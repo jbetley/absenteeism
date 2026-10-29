@@ -1,0 +1,668 @@
+/* Stylesheet
+  author:   jbetley (https://github.com/jbetley)
+  version:  1.03
+  date:     05/14/25
+*/
+
+/*** Page ***/
+html, html a {
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.004);
+  -moz-osx-font-smoothing: grayscale;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+body {
+  color: steelblue;
+  font-family: 'Inter', sans-serif;
+  min-width: fit-content;
+/*  overflow-y: scroll;  always show scrollbar to prevent pixel shift when changing tabs */
+  margin: 5px;
+  background-color: #F2F2F2;
+}
+
+svg {
+  overflow: visible;
+}
+
+/*** Headers and Labels ***/
+header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  min-height: 2vh;
+  width: 100%;
+}
+
+h3 {
+  text-align: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.label__header {
+  background-color: #6783a9;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 700;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  width: 90%;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.label__header-sm {
+  background-color: #6783a9;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 500;
+  padding-bottom: 5px;
+  padding-top: 5px;
+  width: 60%;
+  border-radius: 5px;
+}
+
+/*** Notes, Messages, and Popups ***/
+.note {
+  padding: 2px;
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.note-container {
+  padding: 1px;
+  display: inline-block;
+  margin-bottom: 5px;
+  border: 1px solid steelblue;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.note-container.hover {
+  margin-left: 30px;
+}
+
+.note-container.drop {
+  margin-left: 15px;
+}
+
+.nodata-msg {
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  background-color: #ffffff;
+  color: steelblue;
+  font-weight: 700;
+  text-align: center;
+  width: inherit;
+}
+
+.popup {
+  position: absolute;
+  background-color: #f0f0f0;
+  border: 2px solid #ccc;
+  background-color: #ffffff;
+  border-radius: 5px;
+  font-weight: 600;
+  padding: 10px;
+  z-index: 1;
+  width: 100%;
+}
+
+/*** Buttons ***/
+button {
+  border-radius: 0;
+}
+
+button:focus:not(:focus-visible) {
+  outline: 0;
+}
+
+button,
+select {
+  text-transform: none;
+}
+
+[role="button"] {
+  cursor: pointer;
+}
+
+button {
+  -webkit-appearance: button;
+  appearance: button;
+}
+
+[type="button"]:not(:disabled),
+[type="reset"]:not(:disabled),
+[type="submit"]:not(:disabled),
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+.button-text {
+  clear: both;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: .8;
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+.export-buttons {
+  margin-top: 5px;
+}
+
+/*** Navigation ***/
+.nav-container {
+  display: grid;
+  place-items: center;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.nav-button-container {
+  display: grid;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.nav.open {
+  z-index: 99;
+  margin: 0;
+  padding: 0;
+  float: left;
+  position: relative;
+  display:inline;
+}
+
+#nav-tabs {
+  z-index: 99;
+  margin: 0;
+  padding: 0;
+  float: left;
+  position: relative;
+  display:inline;
+}
+
+.tab  {
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  color: steelblue;
+  background-color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(192, 193, 199, .5);
+  border-radius: .5rem;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+  float:left;
+  display:inline;
+  width: 165px;
+}
+
+.button-tab  {
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  color: steelblue;
+  background-color: #ffffff;
+  font-size: 10px;
+  font-weight: 500;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(192, 193, 199, .5);
+  border-radius: .5rem;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+  display:inline;
+  width: 90px;
+}
+
+.tab:hover {
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  color: white;
+  background-color: #c0c1c7;
+  font-size: 11px;
+  font-weight: 500;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(70, 130, 180, .5);
+  border-radius: .5rem;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+  float:left;
+  display:inline;
+  width: 165px;
+}
+
+.tab.active {
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  color: white;
+  background-color: #c0c1c7;
+  font-size: 11px;
+  font-weight: 600;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(70, 130, 180, .5);
+  border-radius: .5rem;
+  padding: 6px;
+  text-align: center;
+  box-sizing: border-box;
+  float:left;
+  display:inline;
+  width: 165px;
+}
+
+.tab.type, .tab.type.active, .tab.type:hover {
+  width: 65px;
+}
+
+.panel-container  {
+  border: solid #c0c1c7 1px;
+  padding: 10px;
+  border-radius: .5em;
+  -moz-border-radius: .5em;
+  -webkit-border-radius: .5em;
+  height: 100%;
+}
+
+.category-label {
+  display: inline-block;
+  padding-top: 2px;
+  padding-left: 7px;
+  padding-right: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: "steelblue";
+}
+/*** Dropdown Menu ***/
+#dropdown {
+ background: none;
+ font-size: .75rem;
+ border: 1px solid rgba(192,193,199, .5);
+ border-radius: .5rem;
+ margin: 5px;
+ padding: .2em;
+}
+
+select {
+  background: none;
+  border: 0;
+  border-radius: .5rem;
+  box-sizing: border-box;
+  color: steelblue;
+  font-size: .75rem;
+  padding: .5rem .5rem;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+select option {
+  color: steelblue;
+}
+
+select:hover {
+  background-color: #c0c1c7;
+}
+
+select:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+/*** Rows and Columns ***/
+.row {
+  display: flex;
+}
+
+.column, .columns {
+  float: left;
+}
+
+.twelve.columns {
+  width: 100%;
+  margin-left: 0;
+}
+
+/*** Grid ***/
+.parent {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(1, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.state-grid {  
+  grid-area: 1 / 1 / span 1 / span 3;
+  margin-right: 1em;
+  margin-left: 1em;
+  margin-top: 1em;
+  grid-gap: .5em;
+}
+
+.district-grid {  
+  grid-area: 1 / 4 / span 1 / span 3;
+  margin-right: 1em;
+  margin-left: 1em;
+  margin-top: 1em;
+  grid-gap: .5em;
+}
+
+.button-grid {
+  grid-area: 2 / 1 / 2 / span 6;
+  grid-gap: .5em;
+}
+
+.funding-grid {  
+  grid-area: 3 / 1 / span 1 / span 6;
+  margin: 1em;
+  grid-gap: .5em;
+}
+
+.attendance-grid {  
+  grid-area: 3 / 1 / span 1 / span 3;
+  margin: 1em;
+  grid-gap: .5em;
+}
+
+.absenteeism-grid {  
+  grid-area: 3 / 4 / span 1 / span 6;
+  margin: 1em;
+  grid-gap: .5em;
+}
+
+/*** Containers ***/
+.header-box {
+  height: 20px;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  align-items: center;
+}
+
+#attend-msg-container {
+  /* height: 20px; */
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  display: none;
+}
+
+#attend-msg {
+  justify-content: center;
+  width: 85%;
+  margin-bottom: 5px;
+  border: 1px solid steelblue;
+  border-radius: 5px;
+  padding: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  display: none;
+}
+
+#absent-msg-container {
+  /* height: 20px; */
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  display: none;
+}
+
+#absent-msg {
+  justify-content: center;
+  width: 85%;
+  margin-bottom: 5px;
+  border: 1px solid steelblue;
+  border-radius: 5px;
+  padding: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  display: none;
+}
+
+.persistent {
+  display: flex;
+}
+
+.state-box {
+  height: 180px;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-shadow: 2px 2px 2px lightgrey;
+  padding: 0px 10px 10px 10px;
+  margin-bottom: 5px;
+  align-items: center;
+  border-radius: .5em;
+  background-color: #fff;
+}
+
+.district-box {
+  height:180px;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-shadow: 2px 2px 2px lightgrey;
+  padding: 0px 10px 10px 10px;
+  margin-bottom: 5px;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: .5em;
+  background-color: #fff;
+}
+
+.table-box {
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  box-shadow: 2px 2px 2px lightgrey;
+  padding: 15px;
+  align-items: center;
+  border-radius: .5em;
+  background-color: #fff;
+  height: 600px;
+}
+
+/*** Tables ***/
+.state-table-1 {
+  font-family: 'Inter', sans-serif;
+  color: steelblue;
+  height: 150px;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: .5em;
+  margin-right: 5px;
+  position: relative;
+  cursor: pointer;
+}
+
+.state-table-1 > .table-title {
+  top: 0; 
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.state-table-1 td:first-child {
+  font-weight: 500;
+}
+
+/* vertical line between tables */
+.state-table-1::after {
+  content: "";
+  position: absolute;
+  width: .5px;
+  right: 8%;
+  height: 100%;
+  background: steelblue;
+  top: 14%;
+  transform: translate(0%, -10%);
+}
+
+.state-table-2 {
+  font-family: 'Inter', sans-serif;
+  color: steelblue;
+  /* margin-top: 30px; */
+  height: 150px;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: .5em;
+  position: relative;
+}
+
+.state-table-2 > .table-title {
+  top: 0; 
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.state-table-2 td {
+  text-align: center;
+  vertical-align: top;
+}
+
+.state-table-2 td:first-child {
+  text-align: left; 
+  font-weight: 500;
+}
+
+.district-table {
+  padding: 5px;
+  height: 150px;
+  font-family: 'Inter', sans-serif;
+  color: steelblue;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: .5em;
+}
+
+.district-table td:first-child {
+  font-weight: 500;
+}
+
+.district-table td:nth-child(4) {
+  font-weight: 500;
+}
+
+/*** Ag Grid ***/
+.ag-theme-quartz {
+  --ag-font-family: 'Inter', sans-serif;
+  --ag-font-size: 12px;
+  --ag-borders: none;
+  --ag-borders-critical: solid 1px;
+  --ag-border-color: steelblue;
+  --ag-header-foreground-color:steelblue;
+  --ag-data-color:steelblue;
+  --ag-header-column-separator-display: none;
+  --ag-header-column-resize-handle-display: none;
+  --ag-row-border-color: transparent;
+  --ag-header-background-color: #fff;
+  --ag-odd-row-background-color: rgb(238, 238, 238);
+}
+
+.ag-theme-quartz .ag-cell-value {
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 15px !important;
+  word-break: normal; /* prevents words from breaking */
+}
+
+.ag-theme-quartz .ag-row-odd {
+  background-color: var(--ag-odd-row-background-color);
+}
+
+.ag-center-aligned-cell-with-border {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid steelblue !important;
+}
+
+.ag-center-aligned-cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ag-left-aligned-cell {
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
+/* Centers header content container and its children */
+.ag-header-cell-label {
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ensures header text centers when broken into multiple lines */
+.ag-header-cell-text {
+  text-align: center;
+  width: 100%;
+}
+
+/* This affects all headers */ 
+.ag-theme-quartz .ag-header {
+  font-family: 'Inter', sans-serif;
+}
+
+.ag-theme-quartz .ag-header-group-cell {
+  font-weight: normal;
+  font-size: 12px;
+}
+
+.ag-theme-quartz .ag-header-cell {
+  font-weight: 600;
+  font-size: 10px;
+}
+
+/* adjusts font size for ag-grid header once it hits a certain size */
+@media (max-width: 940px) 
+ {
+  .ag-header-cell {
+    font-size: 11px;
+    padding: 8px;
+  }
+ }
+
+.text-center * {
+  justify-content: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.make-big {
+  font-size: 11px !important;
+}

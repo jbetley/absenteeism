@@ -1,0 +1,1334 @@
+<!--
+   State and District School Information Dashboard
+   author:   jbetley (https://github.com/jbetley)
+   version:  1.05
+   date:     10.19.26
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <title>State and District School Dashboard</title>
+
+   <!-- Imported Fonts -->
+   <link  rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+   <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.11.2/css/all.css" integrity="sha384-zrnmn8R8KkWl12rAZFt4yKjxplaDaT7/EUkKm7AovijfrQItFWR7O/JJn4DAa/gx" crossorigin="anonymous">
+
+   <!-- Third-Party Modules -->
+   <script src="{{ url_for('static', filename='ag-grid-community.min.js')}}"></script>
+   <script src="{{ url_for('static', filename='xlsx.bundle.js')}}"></script>
+
+   <!-- Local Modules -->
+   <script src="{{ url_for('static', filename='table-helpers.js')}}"></script>
+   <script src="{{ url_for('static', filename='utils.js')}}"></script>
+   <script src="{{ url_for('static', filename='customNoRowsOverlay.js')}}"></script>
+
+   <!-- Imported Stylesheets -->
+   <link rel="stylesheet" media="all" href="{{ url_for('static', filename='dashboard.css')}}">
+</head>
+<body>
+   <h3>State and District School Information</h3>
+   <form name="dashboardselect" id="dropdown">
+      <label>Select State:</label>
+      <select name="state" id="stateSelect"></select>
+      <br>
+      <label>Select District:</label>
+      <select name="district" id="districtSelect"></select>
+      <div class="note-container drop"><div class="note">Use District dropdown or click on table row to change district information.</div></div>
+   </form>
+   <div id ="tabnavigation">
+      <div class="row">
+         <div class="nav-container twelve columns">
+            <div id="nav-tabs" class="nav">
+               <button data-tab="tab-n-1" id="fundingTab" class="tab main active">District Funding</button>
+               <button data-tab="tab-n-2" id="attendanceTab" class="tab main">Attendance Data</button>
+            </div>
+         </div>
+      </div>
+   </div>
+   <div class="panel-container">
+      <div class="row">
+         <div class="parent">
+               <div class="state-grid">
+                  <div class="header-box persistent label" id="container-state-label"><div id="state-label" class="label__header"></div></div>
+                  <div class="state-box" id="container-state-info">
+                     <div class="state-table-1">
+                        <div class="table-title" id="table-1-title"></div>
+                        <div id="state-info-table-1"></div>
+                        <div class="popup" id="state-popup" style="display: none;"></div>
+                     </div>
+                     <div class="state-table-2">
+                        <div class="table-title" id="table-2-title"></div>
+                        <div id="state-info-table-2"></div>
+                     </div>
+                  </div>
+               </div>
+               <div class="district-grid">
+                  <div class="header-box persistent label" id="container-district-label"><div id="district-label" class="label__header"></div></div>
+                  <div class="district-box" id="container-district-info">
+                     <div class="district-table" id="district-info-table"></div>
+                  </div>
+               </div>
+               <div class="button-grid">
+                  <div class="note-container hover"><div class="note">Hover over bolded text for more information.</div></div>
+                  <div class="nav-button-container twelve columns">
+                     <div class="export-buttons">
+                        <div class="button-text">Download:</div><button id="csvButton" class="button-tab">CSV</button>
+                        <button id="excelButton" class="button-tab">Excel</button>
+                     </div>
+                  </div>
+               </div>
+               <div class="funding-grid">
+                  <div class="header-box label" id="container-funding-label"><div id="funding-label" class="label__header"></div></div>     
+                  <div class="table-box"  id="container-funding-table"><div id="fundingTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+               </div>
+               <div class="attendance-grid">
+                  <div id="tst">
+                  <div class="header-box label" id="container-attendance-label"><div id="attendance-label" class="label__header"></div></div>
+                  <div id="attend-msg-container"><div id="attend-msg">This is an attendance message</div></div>
+               </div>
+                  <div class="table-box"  id="container-attendance-table"><div id="attendanceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+               </div> 
+               <div class="absenteeism-grid">
+                  <div class="header-box label" id="container-absenteeism-label"><div id="absenteeism-label" class="label__header"></div></div>
+                  <div id="absent-msg-container"><div id="absent-msg">This is an absenteeism message</div></div>
+                  <div class="table-box"  id="container-absenteeism-table"><div id="absenteeismTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+               </div>
+         </div>            
+      </div>
+   </div>
+</body>
+<script type="module">
+
+// The district list is not necessarily the same in the funding
+// table (districts) and attendance table (attendance). This is
+// because we want to include charter schools in our attendance
+// data, but they are not always considered LEA's for funding
+// purposes. The districts table contains only LEAs
+const allStatesFunding = `${window.origin}/load_funding`;
+const allStatesFundingResponse = await fetch(allStatesFunding);
+var allStatesFundingObj = await allStatesFundingResponse.json();
+
+const allStatesAcademic = `${window.origin}/load_academic`;
+const allStatesAcademicResponse = await fetch(allStatesAcademic);
+var allStatesAcademicObj = await allStatesAcademicResponse.json();
+
+const attendanceMsgData = `${window.origin}/attend_msg`;
+const attendanceMsgDataResponse = await fetch(attendanceMsgData);
+var attendanceMsgDataObj = await attendanceMsgDataResponse.json();
+
+var titleGridApi,
+   attendanceGridApi,
+   absenteeismGridApi,
+   selectedRow;
+
+const attendanceContainerLabel = document.getElementById("container-attendance-label");
+const attendanceContainer = document.getElementById("container-attendance-table");
+
+const absenteeismContainerLabel = document.getElementById("container-absenteeism-label");
+const absenteeismContainer = document.getElementById("container-absenteeism-table");
+
+const titleContainerLabel = document.getElementById("container-funding-label");
+const titleContainer = document.getElementById("container-funding-table");
+
+const attendMsgContainer = document.getElementById("attend-msg-container");
+const attendMsg = document.getElementById("attend-msg");
+
+const absentMsgContainer = document.getElementById("absent-msg-container");
+const absentMsg = document.getElementById("absent-msg");
+
+async function getStateData(select) {
+   const data = await fetch(`${window.origin}/states`, {
+      method: "POST",
+         credentials: "include",
+         cache: "no-cache",
+         headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+      },
+      body:JSON.stringify(select)})
+      .then(response=>{
+         if (response.ok) {
+            return response.json()
+         } else {
+            alert("Network Error: Could not load data.")
+         }
+   });
+   await setDistrictList()
+   displayStateInfoTables(data);
+};
+
+
+async function getAllDistrictData(state, district) {
+
+   const identifier = [state, district]
+
+   const data = await fetch(`${window.origin}/districts`, {
+      method: "POST",
+         credentials: "include",
+         cache: "no-cache",
+         headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+      },
+      body:JSON.stringify(identifier)})
+      .then(response=>{
+         if (response.ok) {
+            return response.json()
+         } else {
+            alert("Network Error: Could not load data.")
+         }
+      });
+
+   displayDistrictTitleTable(data);
+};
+
+
+async function getSingleDistrictData(state, district) {
+
+   selectedRow = district;
+   const identifier = [state, district]
+
+   const data = await fetch(`${window.origin}/district`, {
+      method: "POST",
+         credentials: "include",
+         cache: "no-cache",
+         headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+      },
+      body:JSON.stringify(identifier)})
+      .then(response=>{
+         if (response.ok) {
+            return response.json()
+         } else {
+            alert("Network Error: Could not load data.")
+         }
+   });
+
+   displayDistrictInfoTable(data);
+};
+
+
+async function getAttendanceData(state, district) {
+
+   const identifier = [state, district]
+
+   const data = await fetch(`${window.origin}/attendance`, {
+      method: "POST",
+         credentials: "include",
+         cache: "no-cache",
+         headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+      },
+      body:JSON.stringify(identifier)})
+      .then(response=>{
+         if (response.ok) {
+            return response.json()
+         } else {
+            alert("Network Error: Could not load data.")
+         }
+      });
+   displayAttendanceTables(data);
+};
+
+async function getAnalysisData(state) {
+
+const identifier = [state]
+
+const data = await fetch(`${window.origin}/analysis`, {
+   method: "POST",
+      credentials: "include",
+      cache: "no-cache",
+      headers: {
+         Accept: "application/json",
+         "Content-Type": "application/json",
+   },
+   body:JSON.stringify(identifier)})
+   .then(response=>{
+      if (response.ok) {
+         return response.json()
+      } else {
+         alert("Network Error: Could not load data.")
+      }
+   });
+
+   console.log(data)
+   
+// displayAnalysisTables(data);
+};
+
+
+// Download district level (attendance/chronic absenteeism or
+// Title funding) data- depending on the currently selected tab-
+// as a csv or (lightly) formatted excel file
+async function downloadData(select, id) {
+
+   const activeTab = document.querySelector(".tab.main.active").id;
+
+   let keyOrder,
+      passed,
+      colNumericFormat,
+      colsToAlignLeft,
+      fileName;
+
+   let colsToFormatNumeric = [];
+
+   if (activeTab == "fundingTab") {
+      passed = [select,"funding"];
+   }
+   else if (activeTab == "attendanceTab") {
+      passed = [select,"attend"];
+   }
+   else {
+      console.error("No tab selected.")
+      return
+   }
+
+   let downloadData;
+
+   let data = await fetch(`${window.origin}/download`, {
+      method: "POST",
+         credentials: "include",
+         cache: "no-cache",
+         headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+      },
+      body:JSON.stringify(passed)})
+      .then(response=>{
+         if (response.ok) {
+            return response.json()
+         } else {
+            alert("Network Error: Could not load data.")
+         }
+   });
+   
+   if (activeTab == "fundingTab") {
+
+      keyOrder = [
+         "State","State Full","District Name","NCES ID","Entity ID","Low Grade","High Grade",
+         "Enrollment","Number Charter Schools","Number Public Schools","Address",
+         "City","State","ZIP","Type","Fund Year"
+      ];
+
+      colNumericFormat = "#,##0";
+      colsToAlignLeft = [2,3,11,12,13]
+      fileName = "districts_title_funding";
+
+      // Now we need to ID the funding cols by prefix, clean the strings, add
+      // the strings to keyOrder, and then change the keys to match
+      const replaceSubstrings = {
+         "Fnd_": "",
+         "and": "and "
+      };
+      const fndSubstring = "Fnd_";
+
+      let allFndKeys = data.flatMap(obj => 
+         Object.keys(obj).filter(key => key.includes(fndSubstring))
+         );
+      let fndKeys = [...new Set(allFndKeys)];
+
+      let replaceKeys = fndKeys.map(str => str.replaceAll(fndSubstring, "").replaceAll("and", "and "));
+      
+      // and add spaces between words
+      let cleanKeys = replaceKeys.map(str => str.replace(/([a-z])([A-Z])/g, '$1 $2'));
+      const numKeys = cleanKeys.length;
+
+      // once we've determined the # of funding headers, we can determine which
+      // cols to format - starting with col 15
+      const startCol = 15;
+      let columnIdxs = [];
+      for (let i = startCol; i <= (startCol + numKeys-1); i++) {
+         columnIdxs.push(i);
+      }
+      // convert them to corresponding alphabet character (64 is the key offset:
+      // in the ASCII table, uppercase 'A' is 65)
+      colsToFormatNumeric = columnIdxs.map(num => String.fromCharCode((num+1) + 64));
+
+      // add funding cols to master key order
+      keyOrder.push(...cleanKeys);
+
+      // Now modify the 'actual' object keys by making replacement and adding spaces
+      // TODO: add this to existing 'replaceSubstringFromKeys' function?
+      const replacePattern = new RegExp(Object.keys(replaceSubstrings).join("|"), "g");
+
+      // Transform the data
+      downloadData = data.map(obj => 
+         Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => {
+               // Replace substrings based on the dictionary lookup
+               const newKey = key.replace(
+                  replacePattern, matched => replaceSubstrings[matched]).replace(/([a-z])([A-Z])/g, '$1 $2'
+               );
+               return [newKey, value];
+            })
+         )
+      );
+
+   }
+   else if (activeTab == "attendanceTab") {
+
+      keyOrder = [
+         "State", "Year", "District Name","Entity ID", "Attendance Rate",
+         "Chronic Absenteeism"
+      ];
+      colsToFormatNumeric = ["E","F"];
+      colNumericFormat = "0.00%";
+      colsToAlignLeft = [2]
+      fileName = "districts_attendance";
+
+      downloadData = structuredClone(data);
+   }
+   else {
+      console.error("No tab selected.")
+      return
+      }
+
+   // rename State Abbreviation
+   const renameData = downloadData.map(({ ["State Abbreviation"]: State, ...rest }) => ({
+      State,
+      ...rest
+   }));
+
+   const reorderedData = reorderKeys(renameData, keyOrder);
+   
+   if (id == "csvButton") {
+      const csv = convertArrayToCSV(reorderedData);
+      downloadCSV(csv, fileName + ".csv");
+   }
+   else if (id == "excelButton") {
+
+      // converts json to excel worksheet object
+      let worksheet = XLSX.utils.json_to_sheet(reorderedData);
+      
+      // add empty sheetJS attribute for column formatting
+      worksheet["!cols"] = [];
+
+      let minWidth = 15;
+
+      // format numerical column values
+      for (let col of colsToFormatNumeric) {
+         formatColumn(worksheet, col, colNumericFormat)
+      };
+      
+      // Adjust with of column to greater of: max header length,
+      // max property length, or minimum width
+      for (let i = 0; i < keyOrder.length; ++i) {
+         let headerWidth = keyOrder[i].length + 5;
+         let maxValueWidth = findMaxValueLength(reorderedData, keyOrder[i]) + 5;
+
+         let colWidth = Math.max(minWidth, maxValueWidth, headerWidth);
+
+         // 'wch" is inner width in MDW
+         if(!worksheet["!cols"][i]) worksheet["!cols"][i] = {wch: 3};
+         worksheet["!cols"][i].width = colWidth;
+      };
+
+      // sheet styling (https://gitbrent.github.io/xlsx-js-style/)
+      var range = XLSX.utils.decode_range(worksheet['!ref']);
+
+      // format headers - font, bold, etc.
+      for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
+         const cellAddress = XLSX.utils.encode_cell({ r: 0, c: colNum });
+         if (cellAddress) {
+            worksheet[cellAddress].s = {
+               font: {
+                  name: "Calibri",
+                  sz: 11,
+                  bold: true,
+                  color: { rgb: "000000" },
+                  },
+               alignment: {
+                  vertical: "center",
+                  horizontal: "center"
+               }
+            }
+         };
+
+         // Center rows- skipping defined (colsAlignToLeft) columns
+         for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
+            if (rowNum != 0) {
+               if (!colsToAlignLeft.includes(colNum)) {
+                  const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: colNum });
+                  if (cellAddress) {
+                     worksheet[cellAddress].s = {
+                        alignment: {
+                           vertical: "center",
+                           horizontal: "center"
+                        }
+                     }
+                  }
+               }
+            }
+         };
+      };
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Districts");
+      XLSX.writeFile(workbook, fileName + ".xlsx", { compression: true });
+   }
+   else {
+      console.error("No button selected.")
+      return
+   }
+};
+
+
+// populate state dropdown
+async function setStateList() {
+
+   let uniqueStates = [...new Map(allStatesFundingObj.map(
+      item => [item["State Abbreviation"], item]
+   )).values()];
+
+   // remove territories and Bureau of Indian affairs - want to
+   // leave them in the data just in case
+   const removeStates = ['BI', 'GU', 'VI', 'PR', 'MP'];
+   uniqueStates = uniqueStates.filter(obj => !removeStates.includes(obj["State Abbreviation"]));
+
+   let stateDropdown = uniqueStates.map(
+      el => ({[el["State Abbreviation"]]: el["State Full"]})
+   );
+
+   stateDropdown.sort(function(a, b) { 
+      return Object.values(a)[0].localeCompare(Object.values(b)[0])
+   }); // swap a & b for reverse sort
+
+   removeOptions(stateSelection);
+
+   stateDropdown.forEach(obj => {
+      Object.entries(obj).forEach(([key, value]) => {
+         stateSelection.appendChild(new Option(value, key));
+      });
+   });
+   setDistrictList();
+};
+
+
+// populate district dropdown
+async function setDistrictList() {
+
+   let sortVal, districtList;
+
+   const activeTab = document.querySelector(".tab.main.active").id;
+
+   let stateAcademicDistricts = allStatesAcademicObj.filter(
+         val => val["State Abbreviation"].includes(stateSelection.value)
+      );
+
+   let stateFundingDistricts = allStatesFundingObj.filter(
+      val => val["State Abbreviation"].includes(stateSelection.value)
+   );
+
+   // if stateAcademicDistricts is <= 1 it means that the only record in
+   // stateAcademicDistricts is "State Average" - so we want to continue
+   // to use the FundingDistricts list for the district Dropdown - "State
+   // Average" is not a clickable link.
+   if (activeTab == "attendanceTab" && stateAcademicDistricts.length > 1) {
+      districtList = stateAcademicDistricts;
+      sortVal = "Attendance Rate";
+   } else {
+      districtList = stateFundingDistricts;
+      sortVal = "Title I";
+   }
+
+   // NOTE: we want list sorted alphabetically, except for the default
+   // displayed district, which we want to be the school with the highest
+   // Title I Allocation or Attendance Rate
+   let sortedDistricts = sortObjectsByNumberWithBlanksToEnd(districtList, sortVal);
+
+   const highest = sortedDistricts.shift();
+
+   sortedDistricts.sort(
+      (a, b) => a["District Name"].toLowerCase() > 
+         b["District Name"].toLowerCase() ? 1 : -1
+   );
+
+   // display is Name, but key is ID
+   const districtObj = sortedDistricts.map(obj => ({
+       name: obj["District Name"],
+       id: obj["Entity ID"]
+      }));
+
+   // a different way to get unique values (see setStateList)
+   let districtDropdown = Array.from(
+      new Set(districtObj.map(o => JSON.stringify(o)))).map(str => JSON.parse(str)
+   );
+
+   // add district with highest Title I value to top of array
+   districtDropdown.splice(0, 0, {
+      name: highest["District Name"],
+      id: highest["Entity ID"]
+   });
+
+   // clear existing options
+   removeOptions(districtSelection);
+
+   const allDistricts = { name: '-- All Schools --', id: '0' };
+
+   districtDropdown.unshift(allDistricts);
+
+   districtDropdown.forEach(
+      (obj) => districtSelection
+      .appendChild(new Option(obj.name, obj.id))
+   );
+};
+
+
+// This function must be located in in index.html so
+// getSingleDistrictData() is in scope
+// TODO: DOes it though? Move get_single_district_data to table helpers? or move
+// TODO: all of the getter functions to their own file?
+function createAgTable(tableData, tableID) {
+
+   // because we don't know what the fund titles will be, we
+   // need to mark them with the Fnd_ prefix for identification,
+   // but not display purposes.
+   const fndSubstring='Fnd_';
+
+   let allFndKeys = tableData.flatMap(obj => 
+      Object.keys(obj).filter(key => key.includes(fndSubstring))
+      );
+   let fndKeys = [...new Set(allFndKeys)];
+
+   let keys = Object.keys(tableData.reduce(function(result, obj) {
+      return Object.assign(result, obj);
+   }, {}));
+
+   let yearKeys = [];
+   let highlightCol;
+
+   // get keys (columns) in correct order
+   if (tableID == "attendanceTable") {
+
+      // get list of years and sort descending
+      const infoCols = ["District Name", "Entity ID"]
+
+      yearKeys = keys.filter(item => !infoCols.includes(item));
+
+      // We only want to display 3 years at a time
+      if (yearKeys.length >= 4) {
+         let numToRemove = yearKeys.length - 3
+         yearKeys.splice(0, numToRemove)
+
+      }
+      yearKeys.sort()
+      yearKeys.reverse()
+      keys = infoCols.concat(yearKeys)
+   }
+   else {
+
+      keys = keys.filter(item => item != "District Name");
+      keys.unshift("District Name")
+
+      // Get "Total" col and reorder put it in the 4th position in the list (1st
+      // after infocols)
+      highlightCol = keys.filter(item => item.includes("Total"));
+      const highLightIdx = keys.indexOf(highlightCol[0]);
+
+      if (highLightIdx !== -1) {
+         keys.splice(highLightIdx, 1); // Remove 1 element at the found index
+         keys.splice(3, 0, highlightCol[0]);
+      }
+   }
+
+   let columns = keys.map(field => ({field}));
+
+   columns.forEach(function(e) {
+      
+      if (e.field == "District Name") {
+         e.valueFormatter = "";
+         e.resizable = false;
+         e.autoHeight = true;
+         e.wrapText = true;
+         e.minWidth = 125;
+         e.maxWidth = 125;
+         e.cellClass = "ag-left-aligned-cell";
+         e.headerClass = "text-center";
+      } else if (e.field == "Entity ID") {
+         e.valueFormatter = blankFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         e.minWidth = 75;
+         e.maxWidth = 75;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = "text-center";
+         e.headerName = "ID"
+      } else if (e.field == "Fund Year") {
+         e.valueFormatter = blankFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         e.maxWidth = 75;
+         e.minWidth = 75;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = "text-center";
+         e.headerName = "Year"
+      } 
+      else if (yearKeys.includes(e.field)) {    // attendanceTable
+         e.valueFormatter = percentFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = "text-center";
+      }
+      else if (highlightCol.includes(e.field)) {     // fundingTable
+
+         let cleanKey = e.field.replace("Fnd_", "");
+         cleanKey = cleanKey.replace("and", " and");
+
+         // add space between upper and lowercase characters
+         let titleKey = cleanKey.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+         e.valueFormatter = moneyFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         e.wrapHeaderText = true;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = ['text-center', 'make-big']
+         e.headerName = titleKey;
+         e.cellStyle = {
+            fontSize: '11px', // 1pt higher
+            fontWeight: '800' 
+         }; 
+      }      
+      else if (fndKeys.includes(e.field)) {     // fundingTable
+
+         let cleanKey = e.field.replace("Fnd_", "");
+         cleanKey = cleanKey.replace("and", " and");
+
+         // add space between upper and lowercase characters
+         let titleKey = cleanKey.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+         e.valueFormatter = moneyFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         // e.maxWidth = 120;
+         // e.minWidth = 120;
+         e.wrapHeaderText = true;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = "text-center";
+         e.headerName = titleKey;
+      }
+      else {
+         // e.minWidth = 60;
+         // e.maxWidth = 60;
+         e.valueFormatter = blankFormatter;
+         e.flex = 1;
+         e.resizable = false;
+         e.cellClass = "ag-center-aligned-cell";
+         e.headerClass = "text-center";
+      }
+   });
+
+
+   // Resets district info table when the respective district
+   // funding row table is clicked - do nothing if "State
+   // Average" is clicked
+   let options = {
+      columnDefs: columns,
+      onRowClicked: function (e) {
+         const schoolName = e.data["District Name"];
+         const state = stateSelection.value;
+         if (schoolName != "State Average") {
+            const id = e.data["Entity ID"];
+            // set district selection equal to row selection
+            districtSelection.value = id;
+            getSingleDistrictData(state, id);
+         }
+      },
+      rowData: tableData,
+      gridId: tableID,
+      tooltipShowDelay: 0,
+      enableBrowserTooltips: false,
+      noRowsOverlayComponent: CustomNoRowsOverlay,
+      noRowsOverlayComponentParams: {
+         noRowsMessageFunc: () =>
+            "No Data to Display.",
+      },
+   };
+
+   return options
+};
+
+// Begin Main //
+
+// Download buttons
+document.querySelectorAll('.button-tab')
+   .forEach(btn => btn.addEventListener('click', function() {
+      downloadData(stateSelection.value, this.id);
+      })
+   );
+
+
+/* Popups */
+// Attach the event listener to the table because the table element
+// is immediately present in the DOM, unlike the the children elements 
+// (tbody, tr, td) which do not exist until DisplayStateInfo is triggered.
+// The content of 'note' changes based on which ID is moused over
+const popup = document.querySelector(".popup");
+
+let stateInfoTable1 = document.getElementById("state-info-table-1");
+
+stateInfoTable1.addEventListener("mouseover", function(event) {
+   
+   // Mouseover events trigger on TDs but not TRs,
+   // and because we attach the note data to the TR, we
+   // need to find the TR for the event TD
+   const row = event.target.closest('tr');
+
+   if (row != null) {
+      if (row.hasAttribute('id')) {
+
+         if (row.id.startsWith('popup-written-notice') |
+            row.id.startsWith('popup-charter-lea-notice')) {
+
+            popup.style.display = "block";
+            popup.innerHTML = row.dataset.note;      
+         }
+         else {
+            popup.style.display = "none";
+         }
+      }
+   }
+   else {
+      popup.style.display = "none";
+   }
+});
+
+stateInfoTable1.addEventListener('mousemove', (event) => {
+   const mouseX = event.clientX;
+   const mouseY = event.clientY;
+   const offsetX = 20;
+   const offsetY = -250;
+
+   popup.style.left = mouseX + offsetX + 'px';
+   popup.style.top = mouseY + offsetY + 'px';
+  });
+
+stateInfoTable1.addEventListener("mouseleave", function(event) {
+   popup.style.display = "none";
+});
+
+/* Nav */
+var districtSelection = document.getElementById("districtSelect");
+var stateSelection = document.getElementById("stateSelect");
+
+stateSelection.addEventListener("change", async () => {
+
+   await getStateData(stateSelection.value);
+   await getSingleDistrictData(stateSelection.value, districtSelection.value);
+
+   const pageTab = document.querySelector(".tab.main.active").id;
+
+   console.log("stateSelection")
+   console.log(districtSelection.value)
+   console.log(stateSelection.value)
+
+   if (pageTab == "attendanceTab") {
+      const stateAttendanceMsg = attendanceMsgDataObj.find(
+         obj => obj['State Abbreviation'] === stateSelection.value
+      );
+
+      absentMsg.textContent = stateAttendanceMsg['Absenteeism Note'];
+      attendMsg.textContent = stateAttendanceMsg['Attendance Note'];
+
+      await getAttendanceData(stateSelection.value, districtSelection.value);
+   } else {
+      await getAllDistrictData(stateSelection.value, districtSelection.value);
+   }
+});
+
+
+districtSelection.addEventListener("change", async () => {
+   
+   const pageTab = document.querySelector(".tab.main.active").id;
+   console.log("districtSelection")
+   console.log(districtSelection.value)
+   console.log(stateSelection.value)
+
+   if (pageTab == "attendanceTab") {
+         await getAttendanceData(stateSelection.value, districtSelection.value);
+         await getSingleDistrictData(stateSelection.value, districtSelection.value);
+   } else if (pageTab == "fundingTab") {
+      await getSingleDistrictData(stateSelection.value, districtSelection.value);
+      await getAllDistrictData(stateSelection.value, districtSelection.value);
+   }
+});
+
+
+// Switches active status for tabs
+const navTabs = document.querySelector("div#nav-tabs"),
+      nav_tab_elms = document.querySelectorAll("button[data-tab], div[data-tab]");
+
+navTabs.onclick = ({target}) => {
+   // ignore other clicks in this area (like spaces between buttons)
+   if (!target.matches("button[data-tab]")) return;
+
+   // cycling through "dataset" and setting class to active
+   // where the target.dataset equals the class
+   nav_tab_elms.forEach(elTab => {
+      elTab.classList
+      .toggle("active", (elTab.dataset.tab===target.dataset.tab))
+   })
+};
+
+
+if (tabnavigation.addEventListener) {
+   tabnavigation.addEventListener('click',navigateHandler,false);
+}
+else {
+   tabnavigation.addEventListener('onclick',navigateHandler);
+};
+
+
+async function navigateHandler(e) {
+   e = e || window.event;
+   const target = e.target || e.srcElement;
+
+   // district resets on state change, but not nav tab change
+   if (target.id == "attendanceTab") {
+
+      titleContainer.style.display = "none";
+      titleContainerLabel.style.display = "none";
+      attendanceContainer.style.display = "flex";
+      attendanceContainerLabel.style.display = "flex";
+      absenteeismContainer.style.display = "flex";
+      absenteeismContainerLabel.style.display = "flex";
+      attendMsgContainer.style.display = "flex";
+      attendMsg.style.display = "flex";
+      absentMsgContainer.style.display = "flex";
+      absentMsg.style.display = "flex";
+
+      const stateAttendanceMsg = attendanceMsgDataObj.find(
+         obj => obj['State Abbreviation'] === stateSelection.value
+      );
+      absentMsg.textContent = stateAttendanceMsg['Absenteeism Note'];
+      attendMsg.textContent = stateAttendanceMsg['Attendance Note'];
+
+      getAttendanceData(stateSelection.value, districtSelection.value);
+
+   }
+   else {
+      attendanceContainer.style.display = "none";
+      attendanceContainerLabel.style.display = "none";
+      absenteeismContainer.style.display = "none";
+      absenteeismContainerLabel.style.display = "none";
+      attendMsgContainer.style.display = "none";
+      attendMsg.style.display = "none";
+      absentMsgContainer.style.display = "none";
+      absentMsg.style.display = "none";
+      titleContainer.style.display = "flex";
+      titleContainerLabel.style.display = "flex";
+
+      getAllDistrictData(stateSelection.value, districtSelection.value);
+   }
+};
+
+
+/* Display functions */
+async function displayStateInfoTables(data) {
+
+   const stateName = stateSelection.options[stateSelection.selectedIndex].text;
+   let stateLabel = document.getElementById("container-state-label");
+   stateLabel.firstChild.textContent = stateName + " Overview";
+
+   let firstPartT = {};
+   let secondPartT = {};
+   let firstPart = {};
+   let secondPart = {};
+   let year;
+
+   if (!Array.isArray(data) || !data.length) {
+      year = "-";
+   }
+   else {
+
+      firstPart = Object.fromEntries(
+         Object.entries(data[0]).filter(([key, value]) => key.includes("Title"))
+      );
+      secondPart = Object.fromEntries(
+         Object.entries(data[0]).filter(([key, value]) => !key.includes("Title"))
+      );
+
+      // get title year for table-2 label
+      year = getYearString(firstPart);
+   }
+
+   let table2Label = document.getElementById("table-2-title");
+   table2Label.textContent = "State Allocations (" + String(year) + ")";
+
+   let table1Label = document.getElementById("table-1-title");
+   table1Label.textContent = "State Overview";
+
+   // fade out both tables at once using the container
+   let stateInfoTableDiv = document.getElementById("container-state-info");
+   
+   fadeDiv(stateInfoTableDiv, 250);
+
+   setTimeout(() => {
+      stateInfoTable(secondPart, "state-info-table-1");
+      allocationsTable(firstPart, "state-info-table-2");
+      fadeDiv(stateInfoTableDiv, 250, false);
+   }, 300);
+};
+
+
+async function displayDistrictInfoTable(data) {
+
+   const districtName = districtSelection.options[districtSelection.selectedIndex].text;
+
+   let districtLabel = document.getElementById("container-district-label");
+   districtLabel.firstChild.textContent = districtName + " Overview";
+
+   // ensure selected table row and selected dropdown item are the same
+   districtSelection.value = selectedRow;
+
+   let tableData;
+
+   if (districtSelection.value == '0') {  // -- All Schools --
+      tableData = {} 
+   } else {
+      tableData = data[0];
+   }
+
+   districtInfoTable(data[0], "district-info-table");
+};
+
+
+async function displayDistrictTitleTable(data) {
+   
+   let tableLabel = document.getElementById("container-funding-label");
+   tableLabel.firstChild.textContent = "School District List";
+
+   // remove unused columns
+   const allKeys = [...new Set(data.flatMap(obj => Object.keys(obj)))];
+   const prefix = 'Fnd_';
+
+   let fndCols = allKeys.filter(key => key.includes(prefix));
+   fndCols.unshift('Entity ID', 'District Name', 'Fund Year'); 
+
+   let tableData = filterObj(data, fndCols);
+
+   let tableOptions = createAgTable(tableData,"fundingTable");
+
+   if (!displayDistrictTitleTable.initialize) {
+
+      // set default visibility of the three tables
+      attendanceContainer.style.display = "none";
+      attendanceContainerLabel.style.display = "none";
+      absenteeismContainer.style.display = "none";
+      absenteeismContainerLabel.style.display = "none";
+      attendMsgContainer.style.display = "none";
+      attendMsg.style.display = "none";
+      absentMsgContainer.style.display = "none";
+      absentMsg.style.display = "none";
+      titleContainer.style.display = "flex";
+      titleContainerLabel.style.display = "flex";
+
+      const titleGridDiv = document.querySelector("#fundingTable");
+
+      titleGridApi = agGrid.createGrid(
+            titleGridDiv, tableOptions
+         );
+         displayDistrictTitleTable.initialize = true;
+   }
+   else {
+      titleGridApi.setGridOption(
+            "columnDefs", tableOptions.columnDefs
+         );
+      titleGridApi.setGridOption("rowData", tableData);
+   }
+};
+
+
+async function displayAttendanceTables(data) {
+
+   let absenteeismCheck, attendanceCheck;
+
+   let attendanceLabel = document.getElementById("container-attendance-label");
+   const stateName = stateSelection.options[stateSelection.selectedIndex].text;
+   attendanceLabel.firstChild.textContent = stateName + " Attendance Rate";
+
+   let absenteeismLabel = document.getElementById("container-absenteeism-label");
+   absenteeismLabel.firstChild.textContent = stateName + " Chronic Absenteeism";
+
+   var emptyTableOptions = {
+      columnDefs: [
+         {
+            headerName: "District Name",
+            field: "District Name",
+            resizable: false,
+            autoHeight: true,
+            minWidth: 150,
+            maxWidth: 150
+         },
+         {
+            headerName: "Entity ID",
+            field: "Entity ID",
+            flex: 1,
+            resizable: false,
+            headerClass: "text-center"
+         },
+         // {
+         //    headerName: "2026",
+         //    field: "2026",
+         //    flex: 1,
+         //    resizable: false,
+         //    headerClass: "text-center"
+         // },
+         // {
+         //    headerName: "2025",
+         //    field: "2025",
+         //    flex: 1,
+         //    resizable: false,
+         //    headerClass: "text-center"
+         // },
+         // {
+         //    headerName: "2024",
+         //    field: "2024",
+         //    flex: 1,
+         //    resizable: false,
+         //    headerClass: "text-center"
+         // },
+      ],
+      rowData: [],
+      enableBrowserTooltips: false,
+      noRowsOverlayComponent: CustomNoRowsOverlay,
+      noRowsOverlayComponentParams: {
+         noRowsMessageFunc: () =>
+            "No Data to Display.",
+      },
+   };
+
+   // data is empty
+   if (!Array.isArray(data) || !data.length) {
+
+      // this is only triggered the first time the attendance data tab is selected
+      if (attendanceGridApi == undefined) {
+
+         const attendanceTableGridDiv = document.querySelector("#attendanceTable");
+         
+         emptyTableOptions.gridId = 'attendanceTable';
+
+         attendanceGridApi = agGrid.createGrid(
+            attendanceTableGridDiv, emptyTableOptions
+            );
+         
+         // now that grid has been created we need to flip the flag
+         displayAttendanceTables.attendanceInit = true;
+
+         } else {
+
+         attendanceGridApi.setGridOption("rowData", []);
+         attendanceGridApi.showNoRowsOverlay();
+
+      }
+
+      if (absenteeismGridApi == undefined) {
+
+         const absenteeismTableGridDiv = document.querySelector("#absenteeismTable");
+         
+         emptyTableOptions.gridId = 'absenteeismTable';
+         
+         absenteeismGridApi = agGrid.createGrid(
+            absenteeismTableGridDiv, emptyTableOptions
+            );
+
+         displayAttendanceTables.absenteeismInit = true;
+
+      } else {
+         absenteeismGridApi.setGridOption("rowData", []);
+         absenteeismGridApi.showNoRowsOverlay();
+      }
+   }
+   // 'data' is not empty (could have AT, CA, or both)
+   else {
+      
+      let attendanceCols = ["Entity ID", "District Name", "Year", "Attendance Rate"];
+      let attendanceFiltered = filterObj(data, attendanceCols);
+
+      let attendanceData = attendanceFiltered.filter( obj => (
+         obj["Attendance Rate"] !== "" &&
+         obj["Attendance Rate"] !== undefined &&
+         typeof obj["Attendance Rate"] !== 'undefined'
+         )
+      );
+
+      // TODO: Check to see if we need this for attendance
+      // Current designed behavior is to display empty tables if the only 
+      // available data is the State Average - so we need to check that
+      // here as well
+
+      // if (attendanceCheck == undefined || hasSameKeyValue(attendanceFiltered, "Entity ID", "99999")) {
+
+      // no AT data in attendanceData
+      if (!Array.isArray(attendanceData) || !attendanceData.length) {
+
+         // create attendance table if it does not exist
+         if (attendanceGridApi == undefined) {
+
+            const attendanceTableGridDiv = document.querySelector("#attendanceTable");
+            
+            emptyTableOptions.gridId = 'attendanceTable';
+            
+            attendanceGridApi = agGrid.createGrid(
+               attendanceTableGridDiv, emptyTableOptions
+               );
+            
+            displayAttendanceTables.attendanceInit = true;
+
+         // empty attendance table
+         } else {
+            attendanceGridApi.setGridOption('columnDefs', []);
+            attendanceGridApi.setGridOption("rowData", []);
+            attendanceGridApi.showNoRowsOverlay();
+         }
+      
+      // there is AT data in attendanceData
+      } else {
+
+         // drop the State Average (Entity ID: 99999) from attendance rate data
+         // (we only collect chronic absenteeism at state level)
+         // let attendanceCleaned = attendanceWithAvalues.filter(
+         //    item => item["Entity ID"] !== "99999"
+         // ); 
+
+         // Change "Attendance Rate" key to the applicable Year
+         let attendanceRenamed = replaceKeyWithValue(attendanceData, 'Year', 'Attendance Rate');
+
+         // merge all years on ID
+         let attendanceMerged = mergeObjectsWithSameValue(attendanceRenamed, "Entity ID");
+         
+         const yearCols = getYearList(attendanceMerged);
+         const removeCols = yearCols.slice(0, 2);
+
+         // remove rows if the two most recent years are 0, null, or undefined
+         let attendanceCleaned = attendanceMerged.filter(obj => {
+            const isEmpty = val => val === 0 || val === null || val === undefined;
+            return !(isEmpty(obj[removeCols[0]]) && isEmpty(obj[removeCols[1]]));
+         });
+
+         // sort the table by the values of the most recent year of data
+         let attendanceSorted = sortObjectsByNumberWithBlanksToEnd(attendanceCleaned,yearCols[0]);
+
+         let attendanceTableOptions = createAgTable(attendanceSorted, "attendanceTable");
+
+         if (!displayAttendanceTables.attendanceInit) {
+
+            const attendanceTableGridDiv = document.querySelector("#attendanceTable");
+
+            attendanceGridApi = agGrid.createGrid(
+               attendanceTableGridDiv, attendanceTableOptions
+               );
+
+            displayAttendanceTables.attendanceInit = true;
+
+         }
+         else {
+            attendanceGridApi.setGridOption(
+               "columnDefs", attendanceTableOptions.columnDefs
+            );
+            attendanceGridApi.setGridOption("rowData", attendanceSorted);
+         }      
+      };
+
+      let absenteeismCols = ["Entity ID", "District Name", "Year", "Chronic Absenteeism"];
+      let absenteeismFiltered = filterObj(data, absenteeismCols);
+
+      // filter for absenteeism data
+      let absenteeismData = absenteeismFiltered.filter( obj => (
+         obj["Chronic Absenteeism"] !== "" &&
+         obj["Chronic Absenteeism"] !== undefined &&
+         typeof obj["Chronic Absenteeism"] !== 'undefined'
+         )
+      );
+
+      // absenteeismData is empty
+      if (!Array.isArray(absenteeismData) || !absenteeismData.length) {
+
+         // create absenteeism table if it does not exist
+         if (absenteeismGridApi == undefined) {
+
+            const absenteeismTableGridDiv = document.querySelector("#absenteeismTable");
+
+            emptyTableOptions.gridId = 'absenteeismTable';
+            
+            absenteeismGridApi = agGrid.createGrid(
+               absenteeismTableGridDiv, emptyTableOptions
+               );
+
+            displayAttendanceTables.absenteeismInit = true;               
+         
+         // empty table
+         } else {
+            attendanceGridApi.setGridOption('columnDefs', []);
+            absenteeismGridApi.setGridOption("rowData", []);
+            absenteeismGridApi.showNoRowsOverlay();
+         }
+
+      // absenteeismData is not empty
+      } else {
+
+         let absenteeismRenamed = replaceKeyWithValue(
+            absenteeismData, 'Year', 'Chronic Absenteeism'
+         );
+
+         let absenteeismMerged = mergeObjectsWithSameValue(
+            absenteeismRenamed, "Entity ID"
+         );
+
+         const yearCols = getYearList(absenteeismMerged);
+         const removeCols = yearCols.slice(0, 2);
+
+         let cleanedData = absenteeismMerged.filter(obj => {
+            const isEmpty = val => val === 0 || val === null || val === undefined;
+            return !(isEmpty(obj[removeCols[0]]) && isEmpty(obj[removeCols[1]]));
+         });
+
+         let absenteeismCleaned = cleanedData.filter(obj => 
+            !yearCols.every(key => obj[key] === 0)
+         );
+
+         let absenteeismSorted = sortObjectsByNumberWithBlanksToEnd(
+            absenteeismCleaned,yearCols[0]
+         );
+
+         let absenteeismTableOptions = createAgTable(
+            absenteeismSorted, "attendanceTable"
+         );
+
+         if (!displayAttendanceTables.absenteeismInit) {
+            
+            const absenteeismTableGridDiv = document.querySelector("#absenteeismTable");
+
+            absenteeismGridApi = agGrid.createGrid(
+               absenteeismTableGridDiv, absenteeismTableOptions
+               );
+
+            displayAttendanceTables.absenteeismInit = true;
+            
+         }
+         else {
+            absenteeismGridApi.setGridOption(
+               "columnDefs", absenteeismTableOptions.columnDefs
+            );
+            absenteeismGridApi.setGridOption("rowData", absenteeismSorted);
+         }
+      }
+   }
+};
+
+
+/* Initialize */
+if (document.readyState !== "loading") {
+   await setStateList();
+   await getStateData(stateSelection.value);
+   await getSingleDistrictData(stateSelection.value, districtSelection.value);
+   await getAllDistrictData(stateSelection.value, districtSelection.value);
+};
+
+</script>
+</html>

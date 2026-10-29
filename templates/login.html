@@ -1,0 +1,106 @@
+<!-- 
+#######################
+# login.html template #
+#######################
+# author:   jbetley (https://github.com/jbetley)
+# version:  1.00
+# date:     04/20/25 
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Login</title>
+  <link rel="shortcut icon" href="https://s3.amazonaws.com/django-blog/ico/favicon_v2.ico">
+  <style>
+    .login-header {
+      font-family: "Montserrat", sans-serif;
+      background-color: #fff;
+      font-weight: 600;
+      color: #4682b4;
+    }
+
+    .login-page {
+      width: 360px;
+      padding: 8% 0 0;
+      margin: auto;
+    }
+
+    .login-page .form .login {
+      margin-top: -31px;
+      margin-bottom: 26px;
+    }
+
+    .form {
+      position: relative;
+      z-index: 1;
+      background: #FFFFFF;
+      max-width: 300px;
+      margin: 0 auto 50px;
+      padding: 35px;
+      text-align: center;
+      box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    .form input {
+      font-family: "Inter", sans-serif;
+      outline: 0;
+      background: #f2f2f2;
+      width: 100%;
+      border: 0;
+      margin: 0 0 15px;
+      padding: 15px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .form button {
+      font-family: "Inter", sans-serif;
+      text-transform: uppercase;
+      outline: 0;
+      background-color: #FFFFFF;
+      background-image: linear-gradient(45deg, #4682b4, #6397c2);
+      width: 100%;
+      border: 0;
+      padding: 15px;
+      color: #FFFFFF;
+      font-size: 14px;
+      -webkit-transition: all 0.3 ease;
+      transition: all 0.3 ease;
+      cursor: pointer;
+    }
+
+    .form .message {
+      margin: 15px 0 0;
+      color: #b3b3b3;
+      font-size: 12px;
+    }
+
+    .login-body {
+      background-color: #4682b4;
+      font-family: "Inter", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body class='login-body'>
+    <form method="POST" action="/form_login">
+      <div class="login-page">
+        <div class="form">
+          <div class="login">
+            <div class="login-header">
+              <br>
+              <br>State and District School Dashboard</br>
+            </div>
+          </div>
+          <input placeholder="Enter your password" type="password" id="pwd-box" name='password'>
+          <Button type="submit" id="login-button">Login</Button>
+          <br></br>
+          <div class="msg"><span style="color:red">{{info}}</span></div>
+        </div>
+      </div>
+    </form>
+  </body>
+</html>
