@@ -237,7 +237,7 @@ async function getAttendanceData(state, district) {
 
 async function getAnalysisData(state) {
 
-const identifier = [state]
+const identifier = [state];
 
 const data = await fetch(`${window.origin}/analysis`, {
    method: "POST",
@@ -257,7 +257,7 @@ const data = await fetch(`${window.origin}/analysis`, {
    });
 
    console.log(data)
-   
+
 // displayAnalysisTables(data);
 };
 
