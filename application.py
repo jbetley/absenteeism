@@ -132,10 +132,6 @@ def load_analysis_data():
     data = request.get_json()
     analysis_data = get_analysis_data(data)
     
-    # drop rows where both values are nan
-    analysis_data = analysis_data.dropna(
-        subset=["Attendance Rate", "Chronic Absenteeism"], how='all'
-    )
     # need this to retain columns with empty values
     analysis_data = analysis_data.fillna("")
 

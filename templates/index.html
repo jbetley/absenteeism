@@ -44,6 +44,7 @@
             <div id="nav-tabs" class="nav">
                <button data-tab="tab-n-1" id="fundingTab" class="tab main active">District Funding</button>
                <button data-tab="tab-n-2" id="attendanceTab" class="tab main">Attendance Data</button>
+               <button data-tab="tab-n-3" id="analysisTab" class="tab main">State Analysis</button>
             </div>
          </div>
       </div>
@@ -257,6 +258,29 @@ const data = await fetch(`${window.origin}/analysis`, {
    });
 
    console.log(data)
+   let topAbsenteeismDiff = {},
+       topAttendRate = {},
+       absenteeismSlice = {},
+       topAttendRateDiff = {},
+       attendanceSlice = {}
+
+   if (data.some(obj => 'Absenteeism Result' in obj)) {
+      topAbsenteeismDiff = data.filter(obj => obj['Absenteeism Result'] === 'Increase');
+      topAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
+   }
+
+   const topAbsenteeism = data.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
+   absenteeismSlice = topAbsenteeism.slice(0, 20);
+
+   if (data.some(obj => 'Attendance Result' in obj)) {
+      topAttendRateDiff = data.filter(obj => obj['Attendance Result'] === 'Deccrease');
+      topAttendRateDiff.sort((a, b) => b['Attendance Difference'] - a['Attendance Difference']);
+   }
+
+   const botAttendance = data.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
+   attendanceSlice = botAttendance.slice(0, 20);
+
+
 
 // displayAnalysisTables(data);
 };
@@ -282,6 +306,9 @@ async function downloadData(select, id) {
    }
    else if (activeTab == "attendanceTab") {
       passed = [select,"attend"];
+   }
+   else if (activeTab == "analysisTab") {
+      passed = [select,"analysis"];
    }
    else {
       console.error("No tab selected.")
@@ -383,6 +410,20 @@ async function downloadData(select, id) {
 
       downloadData = structuredClone(data);
    }
+   else if (activeTab == "analysisTab") {
+      console.log("DOWNLOGDSING ANALYSIS")
+      // keyOrder = [
+      //    "State", "Year", "District Name","Entity ID", "Attendance Rate",
+      //    "Chronic Absenteeism"
+      // ];
+      // colsToFormatNumeric = ["E","F"];
+      // colNumericFormat = "0.00%";
+      // colsToAlignLeft = [2]
+      // fileName = "districts_attendance";
+
+      // downloadData = structuredClone(data);
+}
+
    else {
       console.error("No tab selected.")
       return
@@ -601,6 +642,8 @@ function createAgTable(tableData, tableID) {
    let yearKeys = [];
    let highlightCol;
 
+// TODO: ADD ANALYSIS TABLE
+
    // get keys (columns) in correct order
    if (tableID == "attendanceTable") {
 
@@ -818,14 +861,13 @@ var stateSelection = document.getElementById("stateSelect");
 
 stateSelection.addEventListener("change", async () => {
 
+
    await getStateData(stateSelection.value);
    await getSingleDistrictData(stateSelection.value, districtSelection.value);
 
    const pageTab = document.querySelector(".tab.main.active").id;
-
-   console.log("stateSelection")
-   console.log(districtSelection.value)
-   console.log(stateSelection.value)
+   
+   console.log(pageTab)
 
    if (pageTab == "attendanceTab") {
       const stateAttendanceMsg = attendanceMsgDataObj.find(
@@ -836,8 +878,13 @@ stateSelection.addEventListener("change", async () => {
       attendMsg.textContent = stateAttendanceMsg['Attendance Note'];
 
       await getAttendanceData(stateSelection.value, districtSelection.value);
-   } else {
+
+   } else if  (pageTab == "fundingTab") {
       await getAllDistrictData(stateSelection.value, districtSelection.value);
+   }
+
+   else {
+      await getAnalysisData(stateSelection.value);
    }
 });
 
@@ -845,9 +892,6 @@ stateSelection.addEventListener("change", async () => {
 districtSelection.addEventListener("change", async () => {
    
    const pageTab = document.querySelector(".tab.main.active").id;
-   console.log("districtSelection")
-   console.log(districtSelection.value)
-   console.log(stateSelection.value)
 
    if (pageTab == "attendanceTab") {
          await getAttendanceData(stateSelection.value, districtSelection.value);
@@ -911,7 +955,7 @@ async function navigateHandler(e) {
       getAttendanceData(stateSelection.value, districtSelection.value);
 
    }
-   else {
+   else if (target.id == "fundingTab")  {
       attendanceContainer.style.display = "none";
       attendanceContainerLabel.style.display = "none";
       absenteeismContainer.style.display = "none";
@@ -924,6 +968,20 @@ async function navigateHandler(e) {
       titleContainerLabel.style.display = "flex";
 
       getAllDistrictData(stateSelection.value, districtSelection.value);
+      
+   } else {
+      attendanceContainer.style.display = "none";
+      attendanceContainerLabel.style.display = "none";
+      absenteeismContainer.style.display = "none";
+      absenteeismContainerLabel.style.display = "none";
+      attendMsgContainer.style.display = "none";
+      attendMsg.style.display = "none";
+      absentMsgContainer.style.display = "none";
+      absentMsg.style.display = "none";
+      titleContainer.style.display = "none";
+      titleContainerLabel.style.display = "none";
+
+      getAnalysisData(stateSelection.value)
    }
 };
 

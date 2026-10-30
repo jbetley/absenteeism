@@ -8,6 +8,7 @@
 
 import heapq
 
+import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine, text
 
@@ -204,8 +205,6 @@ def get_all_district_data(data):
     else:
         merged_data = district_data.copy()
         
-    # merged_data.to_csv('merged_tmp.csv', index=False) #NOTE: Test
-    # district_finance_data.to_csv('test-finance_data.csv', index=False) #NOTE: Test
     # district_data.to_csv('test-district_data.csv', index=False) #NOTE: Test
 
     return merged_data.reset_index(drop=True)
@@ -213,14 +212,14 @@ def get_all_district_data(data):
 
 def get_analysis_data(state_id):
     
-    params = {"state_id": state_id}
-    
+    params = {"state_id": state_id[0]}
+
     # attendance data
     q1 = text(
         """
         SELECT *
             FROM district_attendance
-            WHERE StateAbbreviation = :state
+            WHERE StateAbbreviation = :state_id
         """,
     )
 
@@ -231,12 +230,11 @@ def get_analysis_data(state_id):
         """
         SELECT *
             FROM district_finance
-            WHERE StateAbbreviation = :state
+            WHERE StateAbbreviation = :state_id
         """,
     )
 
     raw_finance_data = run_query(q2, params)
-
     raw_finance_data['Value'] = raw_finance_data['Value'].apply(pd.to_numeric, errors='coerce')
         
     district_finance_data = raw_finance_data.pivot_table(
@@ -245,31 +243,91 @@ def get_analysis_data(state_id):
         values='Value', 
     ).reset_index()
 
+    # Apply Fnd_ prefix to specific columns - we should be able to identify the
+    # column we want to highlight by searching for the substring "Total" - which
+    # comes in three flavors: "TotalStateAndLocalRevenue","TotalStateAid",
+    # "TotalStateRevenue"
     exclude_set = {"Entity ID", "Name","Fund Year"}
     clean_col_list = [col for col in district_finance_data.columns if col not in exclude_set]
-    district_finance_data[clean_col_list] = district_finance_data[clean_col_list].apply(pd.to_numeric, errors='coerce')
-        
-    # merge the two
+    district_finance_data = district_finance_data.rename(
+        columns=lambda x: f'Fnd_{x}' if x in clean_col_list else x
+    )
+
+    # remove all funding cols except those in the list
+    # total_revenue_list = ["TotalStateAndLocalRevenue","TotalStateAid", "TotalStateRevenue"]    
+    # if any(item in clean_col_list for item in total_revenue_list):
+    #     remove_cols = [item for item in clean_col_list if "Total" not in item]
+    #     district_finance_data = district_finance_data.drop(
+    #         columns=district_finance_data.columns.intersection(remove_cols)
+    #     )
+        # numeric_col = [item for item in clean_col_list if item not in set(remove_cols)]
+        # district_finance_data[numeric_col] = district_finance_data[numeric_col].apply(pd.to_numeric, errors='coerce')
+    # else:
+    #     print("NO TOTAL REV")
+    #     print(clean_col_list)
+
     merged_data = pd.merge(
         raw_attendance_data, district_finance_data, on='Entity ID', how='left'
     )
 
-    # Apply Fnd_ prefix to specific columns and get list of prefixed cols
-    district_finance_data = district_finance_data.rename(columns=lambda x: f'Fnd_{x}' if x in clean_col_list else x)
-    tagged_col_list = [col for col in district_finance_data.columns if col not in exclude_set]
-    merged_data.dropna(subset=tagged_col_list, how='all', inplace=True)
+    # get year list, keep most recent two years and drop rest
+    year_list = sorted(merged_data['Year'].unique().tolist(), reverse=True)
+    keep_years = year_list[:2]
     
-    # after merging, find the name of the funding column that contains
-    # the absolute max value and sort by that column
-    # max_column = merged_data[tagged_col_list].max().idxmax()
-    # merged_data = merged_data.sort_values(by=max_column, ascending=False)
+    # get abesnteeism/attendance difference from most current and previous year if values exist
+    if len(keep_years) > 1:
+        first_yr = merged_data[merged_data['Year'] == keep_years[0]].copy()
+        second_yr = merged_data[merged_data['Year'] == keep_years[1]].copy()
+
+        analysis_df = pd.merge(first_yr, second_yr, on="Entity ID", suffixes=("_cur", "_prev"))
         
-    # merged_data.to_csv('merged_tmp.csv', index=False) #NOTE: Test
-    # district_finance_data.to_csv('test-finance_data.csv', index=False) #NOTE: Test
+
+        
+        # Subtract the values to find the difference for both and add to analysis_df
+        # if present. Then add to result, which merges the 'current year' to the
+        # analysis data
+        merge_cols = ["Entity ID"]
+        
+        if "Chronic Absenteeism_cur" in analysis_df.columns and (
+            ~analysis_df["Chronic Absenteeism_cur"].isna().all() and ~analysis_df["Chronic Absenteeism_prev"].isna().all()
+        ):
+            analysis_df["Absenteeism Difference"] = analysis_df["Chronic Absenteeism_cur"] - analysis_df["Chronic Absenteeism_prev"]
+            analysis_df['Absenteeism Result'] = np.where(analysis_df["Absenteeism Difference"] > 0, "Increase", "Decrease")
+            merge_cols.extend(["Absenteeism Difference", "Absenteeism Result"])
+
+        if "Attendance Rate_cur" in analysis_df.columns and (
+            ~analysis_df["Attendance Rate_cur"].isna().all() and ~analysis_df["Attendance Rate_prev"].isna().all()
+        ):
+            analysis_df["Attendance Difference"] = analysis_df["Attendance Rate_cur"] - analysis_df["Attendance Rate_prev"]
+            analysis_df['Attendance Result'] = np.where(analysis_df["Attendance Difference"] > 0, "Increase", "Decrease")
+            merge_cols.extend(["Attendance Difference", "Attendance Result"])
+        
+        result_df = pd.merge(
+            first_yr,
+            analysis_df[merge_cols],
+            on='Entity ID', 
+            how='left'
+        )
+    else:
+        print("EMPTYS")
+        result_df = merged_data.copy()
+
+    # Last step is to add prior year data (if it exits) if either Absenteeism or
+    # Attendance column is null for the current year- adding a "Fill Year" allows
+    # us to test for the presence of prev year data
+    if (result_df['Attendance Rate'].isna().all() and ~second_yr['Attendance Rate'].isna().all()):
+        result_df = result_df.drop(columns=['Attendance Rate'])
+        result_df = result_df.merge(second_yr[['Entity ID', 'Attendance Rate']], on='Entity ID', how='left')
+        result_df['Fill Year'] = keep_years[1]
+            
+    if (result_df['Chronic Absenteeism'].isna().all() and ~second_yr['Chronic Absenteeism'].isna().all()):
+        result_df = result_df.drop(columns=['Chronic Absenteeism'])
+        result_df = result_df.merge(second_yr[['Entity ID', 'Chronic Absenteeism']], on='Entity ID', how='left')
+        result_df['Fill Year'] = keep_years[1]
+
     # district_data.to_csv('test-district_data.csv', index=False) #NOTE: Test
 
-    return merged_data.reset_index(drop=True)
-
+    return result_df.reset_index(drop=True)
 
 
 # gets single district by matching districtID and stateabbrev (EntityIDs
