@@ -292,15 +292,13 @@ def get_analysis_data(state_id):
             ~analysis_df["Chronic Absenteeism_cur"].isna().all() and ~analysis_df["Chronic Absenteeism_prev"].isna().all()
         ):
             analysis_df["Absenteeism Difference"] = analysis_df["Chronic Absenteeism_cur"] - analysis_df["Chronic Absenteeism_prev"]
-            analysis_df['Absenteeism Result'] = np.where(analysis_df["Absenteeism Difference"] > 0, "Increase", "Decrease")
-            merge_cols.extend(["Absenteeism Difference", "Absenteeism Result"])
+            merge_cols.extend(["Absenteeism Difference"])
 
         if "Attendance Rate_cur" in analysis_df.columns and (
             ~analysis_df["Attendance Rate_cur"].isna().all() and ~analysis_df["Attendance Rate_prev"].isna().all()
         ):
             analysis_df["Attendance Difference"] = analysis_df["Attendance Rate_cur"] - analysis_df["Attendance Rate_prev"]
-            analysis_df['Attendance Result'] = np.where(analysis_df["Attendance Difference"] > 0, "Increase", "Decrease")
-            merge_cols.extend(["Attendance Difference", "Attendance Result"])
+            merge_cols.extend(["Attendance Difference"])
         
         result_df = pd.merge(
             first_yr,
