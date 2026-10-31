@@ -141,10 +141,10 @@ const attendanceContainer = document.getElementById("container-attendance-table"
 const absenteeismContainerLabel = document.getElementById("container-absenteeism-label");
 const absenteeismContainer = document.getElementById("container-absenteeism-table");
 
-const absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
+const absenteeismDiffContainerLabel = document.getElementById("container-absenteeism-diff-label");
 const absenteeismDiffContainer = document.getElementById("container-absenteeism-diff-table");
 
-const absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
+const absenteeismSliceContainerLabel = document.getElementById("container-absenteeism-slice-label");
 const absenteeismSliceContainer = document.getElementById("container-absenteeism-slice-table");
 
 const titleContainerLabel = document.getElementById("container-funding-label");
@@ -647,28 +647,28 @@ function createAgTable(tableData, tableID) {
       keys = keys.filter(item => item != "District Name");
       keys.unshift("District Name")
 
-      // Get "Total" col and reorder put it in the 4th position in the list (1st
-      // after infocols)
-      // totalCol = keys.filter(item => item.includes("Total"));
+      // Ensure "Total" col is in the 4th position in the list
       const highLightIdx = keys.indexOf(totalCol[0]);
 
       if (highLightIdx !== -1) {
          keys.splice(highLightIdx, 1); // Remove 1 element at the found index
          keys.splice(3, 0, totalCol[0]);
       }
-   } else if (tableID = "absenteeismDiffTable") {
+
+   } else if (tableID == "absenteeismDiffTable") {
       keys = [
-         'District Name', 'Absenteeism', 'Difference', 'Enrollment', totalCol[0]
+         'District Name', 'Absenteeism', 'Increase', 'Enrollment', totalCol[0]
       ];
-   } else if (tableID = "absenteeismSliceTable") {
+   } else if (tableID == "absenteeismSliceTable") {
+      console.log("YOOOO")
       keys = [
          'District Name', 'Absenteeism', 'Enrollment', 'Result', totalCol[0]
       ];
-   } else if (tableID = "attendanceDiffTable") {
+   } else if (tableID == "attendanceDiffTable") {
       keys = [
-         'District Name', 'Attendance', 'Difference', 'Enrollment', totalCol[0]
+         'District Name', 'Attendance', 'Increase', 'Enrollment', totalCol[0]
       ];
-   } else if (tableID = "attendanceSliceTable") {
+   } else if (tableID == "attendanceSliceTable") {
       keys = [
          'District Name', 'Attendance', 'Enrollment', totalCol[0]
       ];
@@ -708,7 +708,8 @@ function createAgTable(tableData, tableID) {
       } 
       else if (
          yearKeys.includes(e.field) || 
-         e.field == "Difference" ||
+         e.field == "Increase" ||
+         e.field == "Decrease" ||
          e.field == "Absenteeism" ||
          e.field == "Attendance"
       ) {   
@@ -937,6 +938,10 @@ async function navigateHandler(e) {
 
       titleContainer.style.display = "none";
       titleContainerLabel.style.display = "none";
+      absenteeismDiffContainer.style.display = "none";
+      absenteeismDiffContainerLabel.style.display = "none";
+      absenteeismSliceContainer.style.display = "none";
+      absenteeismSliceContainerLabel.style.display = "none";
       attendanceContainer.style.display = "flex";
       attendanceContainerLabel.style.display = "flex";
       absenteeismContainer.style.display = "flex";
@@ -956,6 +961,7 @@ async function navigateHandler(e) {
 
    }
    else if (target.id == "fundingTab")  {
+
       attendanceContainer.style.display = "none";
       attendanceContainerLabel.style.display = "none";
       absenteeismContainer.style.display = "none";
@@ -964,6 +970,10 @@ async function navigateHandler(e) {
       attendMsg.style.display = "none";
       absentMsgContainer.style.display = "none";
       absentMsg.style.display = "none";
+      absenteeismDiffContainer.style.display = "none";
+      absenteeismDiffContainerLabel.style.display = "none";
+      absenteeismSliceContainer.style.display = "none";
+      absenteeismSliceContainerLabel.style.display = "none";  
       titleContainer.style.display = "flex";
       titleContainerLabel.style.display = "flex";
 
@@ -980,6 +990,10 @@ async function navigateHandler(e) {
       absentMsg.style.display = "none";
       titleContainer.style.display = "none";
       titleContainerLabel.style.display = "none";
+      absenteeismDiffContainer.style.display = "flex";
+      absenteeismDiffContainerLabel.style.display = "flex";
+      absenteeismSliceContainer.style.display = "flex";
+      absenteeismSliceContainerLabel.style.display = "flex";
 
       getAnalysisData(stateSelection.value)
    }
@@ -1083,6 +1097,10 @@ async function displayDistrictTitleTable(data) {
       attendMsg.style.display = "none";
       absentMsgContainer.style.display = "none";
       absentMsg.style.display = "none";
+      absenteeismDiffContainer.style.display = "none";
+      absenteeismDiffContainerLabel.style.display = "none";
+      absenteeismSliceContainer.style.display = "none";
+      absenteeismSliceContainerLabel.style.display = "none"; 
       titleContainer.style.display = "flex";
       titleContainerLabel.style.display = "flex";
 
@@ -1102,10 +1120,7 @@ async function displayDistrictTitleTable(data) {
 };
 
 async function displayAnalysisTables(data) {
-// Current Absenteeim, From Last Year, Change, TotalFunding, Enrollment, ID, Name
-// Current Attendance, From Last Year, Change, TotalFunding, Enrollment, ID, Name
-// Attendance Rate, Total Funding, Enrollment, ID, Name
-// Absenteeim Rate, Total Funding, Enrollment, ID, Name
+
    function replaceKeys(data,keymap) {
       let newkeys = data.map(obj => {
          const newObj = {};
@@ -1120,8 +1135,6 @@ async function displayAnalysisTables(data) {
       });
       return newkeys
    }
-   console.log("Diff Init?")
-   console.log(absenteeismDiffGridApi)
 
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
@@ -1133,8 +1146,8 @@ async function displayAnalysisTables(data) {
        attendanceSlice = {};
 
    const keyMap = {
-      'Absenteeism Difference': 'Difference',
-      'Attendance Difference': 'Difference',
+      'Absenteeism Difference': 'Increase',
+      'Attendance Difference': 'Increase',
       'Absenteeism Result': 'Result',
       'Attendance Result': 'Result',
       'Chronic Absenteeism': 'Absenteeism',
@@ -1145,23 +1158,52 @@ async function displayAnalysisTables(data) {
       let rawAbsenteeismDiff = data.filter(obj => obj['Absenteeism Result'] === 'Increase');
       rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
       absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
-
       absenteeismDiffLabel.firstChild.textContent = "Laragest Absenteeism Increase";
 
-      const topAbsenteeism = data.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
-      absenteeismSlice = topAbsenteeism.slice(0, 20);
-
+      let rawAbsenteeismSlice = data.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
+      rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
+      absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
       absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
    }
 
    if (data.some(obj => 'Attendance Result' in obj)) {
-      let rawAttendanceDiff = data.filter(obj => obj['Attendance Result'] === 'Deccrease');
+      let rawAttendanceDiff = data.filter(obj => obj['Attendance Result'] === 'Decrease');
       rawAttendanceDiff.sort((a, b) => b['Attendance Difference'] - a['Attendance Difference']);
       attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
+      attendanceDiffLabel.firstChild.textContent = "Laragest Attendance Decrease";
 
-      const botAttendance = data.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
-      attendanceSlice = botAttendance.slice(0, 20);
+      let rawAttendanceSlice = data.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
+      rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
+      attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
+      attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
    }
+
+   var emptyTableOptions = {
+      columnDefs: [
+         {
+            headerName: "District Name",
+            field: "District Name",
+            resizable: false,
+            autoHeight: true,
+            minWidth: 150,
+            maxWidth: 150
+         },
+         {
+            headerName: "Entity ID",
+            field: "Entity ID",
+            flex: 1,
+            resizable: false,
+            headerClass: "text-center"
+         },
+      ],
+      rowData: [],
+      enableBrowserTooltips: false,
+      noRowsOverlayComponent: CustomNoRowsOverlay,
+      noRowsOverlayComponentParams: {
+         noRowsMessageFunc: () =>
+            "No Data to Display.",
+      },
+   };
 
    /* Absenteeism Diff */
    if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
@@ -1185,12 +1227,13 @@ async function displayAnalysisTables(data) {
       }
    } else {
 
-      let absenteeismDiffGridApiTableOptions = createAgTable(
-         absenteeismDiff, "absenteeismDiffGridApiTable"
+      let absenteeismDiffTableOptions = createAgTable(
+         absenteeismDiff, "absenteeismDiffTable"
       );
 
       // create table if it does not exist
-      if (absenteeismDiffGridApi != undefined) {
+
+      if (absenteeismDiffGridApi == undefined) {
 
          const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
 
@@ -1226,11 +1269,11 @@ async function displayAnalysisTables(data) {
          }
          } else {
 
-         let absenteeismSliceGridApiTableOptions = createAgTable(
-            absenteeismSlice, "absenteeismSliceGridApiTable"
+         let absenteeismSliceTableOptions = createAgTable(
+            absenteeismSlice, "absenteeismSliceTable"
          );
 
-         if (absenteeismSliceGridApi != undefined) {
+         if (absenteeismSliceGridApi == undefined) {
 
             const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
 
