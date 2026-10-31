@@ -605,6 +605,7 @@ async function setDistrictList() {
 // getSingleDistrictData() is in scope
 // TODO: DOes it though? Move get_single_district_data to table helpers? or move
 // TODO: all of the getter functions to their own file?
+// TODO: REWORK THIS
 function createAgTable(tableData, tableID) {
 
    // because we don't know what the fund titles will be, we
@@ -622,6 +623,7 @@ function createAgTable(tableData, tableID) {
    }, {}));
 
    let yearKeys = [];
+
    let totalCol = keys.filter(item => item.includes("Total"));
 
    // get keys (columns) in correct order
@@ -657,20 +659,21 @@ function createAgTable(tableData, tableID) {
 
    } else if (tableID == "absenteeismDiffTable") {
       keys = [
-         'District Name', 'Absenteeism', 'Increase', 'Enrollment', totalCol[0]
+         'District Name', 'Absenteeism', 'Increase', totalCol[0]
       ];
    } else if (tableID == "absenteeismSliceTable") {
       console.log("YOOOO")
+      console.log(tableData)
       keys = [
-         'District Name', 'Absenteeism', 'Enrollment', 'Result', totalCol[0]
+         'District Name', 'Absenteeism', 'Change from Previous Year', totalCol[0]
       ];
    } else if (tableID == "attendanceDiffTable") {
-      keys = [
-         'District Name', 'Attendance', 'Increase', 'Enrollment', totalCol[0]
+            keys = [
+         'District Name', 'Attendance', 'Increase', totalCol[0]
       ];
    } else if (tableID == "attendanceSliceTable") {
       keys = [
-         'District Name', 'Attendance', 'Enrollment', totalCol[0]
+         'District Name', 'Attendance', 'CHange from Previous Year', , totalCol[0]
       ];
    }
 
@@ -712,55 +715,65 @@ function createAgTable(tableData, tableID) {
          e.field == "Decrease" ||
          e.field == "Absenteeism" ||
          e.field == "Attendance"
-      ) {   
+      ) {
+
+         let header;
+
+         if (e.field == "Absenteeism" || e.field == "Attendance") {
+            header = e.field + " (" + String(tableData[0].Year) + ")";
+         } else {
+            header = e.field;
+         }
+         if (e.field == "Increase" || e.field == "Decrease") {
+            e.cellStyle = params => {
+               if (params.value < 0) {
+                  return { color: 'red' };
+               }
+               if (params.value > 0) {
+                  return { color: 'green' };
+               }
+               return null;
+            };
+         }
+
          e.valueFormatter = percentFormatter;
          e.flex = 1;
          e.resizable = false;
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
+         e.headerName = header;
       }
-      else if (totalCol.includes(e.field)) {
-
-         let cleanKey = e.field.replace("Fnd_", "");
-         cleanKey = cleanKey.replace("and", " and");
-
-         // add space between upper and lowercase characters
-         let titleKey = cleanKey.replace(/([a-z])([A-Z])/g, '$1 $2');
-
+      else if (totalCol.includes(e.field)) { // fund total col
+         
+         // slightly larger and bolder
          e.valueFormatter = moneyFormatter;
          e.flex = 1;
          e.resizable = false;
          e.wrapHeaderText = true;
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = ['text-center', 'make-big']
-         e.headerName = titleKey;
+         e.headerName = "State & Local Funding";
          e.cellStyle = {
-            fontSize: '11px', // 1pt higher
+            fontSize: '11px',
             fontWeight: '800' 
          }; 
       }
-      //TODO: Is this duplicative?
-      else if (fndKeys.includes(e.field)) {
+      else if (fndKeys.includes(e.field)) {  // all other fund columns
 
+         // remove prefix and add spaces
          let cleanKey = e.field.replace("Fnd_", "");
          cleanKey = cleanKey.replace("and", " and");
-
-         // add space between upper and lowercase characters
-         let titleKey = cleanKey.replace(/([a-z])([A-Z])/g, '$1 $2');
+         const titleKey = cleanKey.replace(/([a-z])([A-Z])/g, '$1 $2');
 
          e.valueFormatter = moneyFormatter;
          e.flex = 1;
          e.resizable = false;
-         // e.maxWidth = 120;
-         // e.minWidth = 120;
          e.wrapHeaderText = true;
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
          e.headerName = titleKey;
       }
       else {
-         // e.minWidth = 60;
-         // e.maxWidth = 60;
          e.valueFormatter = blankFormatter;
          e.flex = 1;
          e.resizable = false;
@@ -1148,17 +1161,18 @@ async function displayAnalysisTables(data) {
    const keyMap = {
       'Absenteeism Difference': 'Increase',
       'Attendance Difference': 'Increase',
-      'Absenteeism Result': 'Result',
-      'Attendance Result': 'Result',
+      'Absenteeism Result': 'Change from Previous Year',
+      'Attendance Result': 'Change from Previous Year',
       'Chronic Absenteeism': 'Absenteeism',
       'Attendance Rate': 'Attendance',
    };
+
 
    if (data.some(obj => 'Absenteeism Result' in obj)) {
       let rawAbsenteeismDiff = data.filter(obj => obj['Absenteeism Result'] === 'Increase');
       rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
       absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
-      absenteeismDiffLabel.firstChild.textContent = "Laragest Absenteeism Increase";
+      absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
 
       let rawAbsenteeismSlice = data.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
       rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
@@ -1170,7 +1184,7 @@ async function displayAnalysisTables(data) {
       let rawAttendanceDiff = data.filter(obj => obj['Attendance Result'] === 'Decrease');
       rawAttendanceDiff.sort((a, b) => b['Attendance Difference'] - a['Attendance Difference']);
       attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
-      attendanceDiffLabel.firstChild.textContent = "Laragest Attendance Decrease";
+      attendanceDiffLabel.firstChild.textContent = "Largest Attendance Decrease";
 
       let rawAttendanceSlice = data.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
       rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
