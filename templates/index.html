@@ -85,8 +85,12 @@
                   </div>
                </div>
                <div class="analysis-tab-grid nav" id="analysis-tabs-container">
-                  <button data-tab="tab-n-4" id="absenteeismAnalysisTab" class="tab main active">Absenteeism</button>
-                  <button data-tab="tab-n-5" id="attendanceAnalysisTab" class="tab main">Attendance Rate</button>
+                  <div id ="analysistabnavigation">
+                     <div id="analysis-nav-tabs" class="nav">
+                        <button data-tab="tab-n-4" id="absenteeismAnalysisTab" class="tab main">Absenteeism</button>
+                        <button data-tab="tab-n-5" id="attendanceAnalysisTab" class="tab main">Attendance Rate</button>
+                     </div>
+                  </div>
                </div>
                <div class="funding-grid">
                   <div class="header-box label" id="container-funding-label"><div id="funding-label" class="label__header"></div></div>     
@@ -118,7 +122,7 @@
                </div>
                <div class="attendance-slice-grid">
                   <div class="header-box label" id="container-attendance-slice-label"><div id="attendance-slice-label" class="label__header"></div></div>
-                  <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+                  <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
                </div>               
          </div>            
       </div>
@@ -148,6 +152,8 @@ var titleGridApi,
    absenteeismGridApi,
    absenteeismDiffGridApi,
    absenteeismSliceGridApi,
+   attendanceDiffGridApi,
+   attendanceSliceGridApi,
    selectedRow;
 
 const attendanceContainerLabel = document.getElementById("container-attendance-label");
@@ -294,9 +300,6 @@ async function getAnalysisData(state) {
 };
 
 
-// Download district level (attendance/chronic absenteeism or
-// Title funding) data- depending on the currently selected tab-
-// as a csv or (lightly) formatted excel file
 async function downloadData(select, id) {
 
    const activeTab = document.querySelector(".tab.main.active").id;
@@ -418,6 +421,7 @@ async function downloadData(select, id) {
       downloadData = structuredClone(data);
    }
    else if (activeTab == "analysisTab") {
+      // check if activetab is attendance or absenteeism
       console.log("DOWNLOGDSING ANALYSIS")
       // keyOrder = [
       //    "State", "Year", "District Name","Entity ID", "Attendance Rate",
@@ -685,11 +689,11 @@ function createAgTable(tableData, tableID) {
    } else if (tableID.includes('Diff') || tableID.includes('Slice')) {
       if (tableID.includes('absenteeism')) {
          keys = [
-            'District Name', 'Absenteeism', 'Change', totalCol[0]
+            'District Name', 'Absenteeism', 'Absenteeism Change', totalCol[0]
          ];
       } else {
          keys = [
-            'District Name', 'Attendance', 'Change', totalCol[0]
+            'District Name', 'Attendance', 'Attendance Change', totalCol[0]
          ];
       }
    }
@@ -728,7 +732,7 @@ function createAgTable(tableData, tableID) {
       } 
       else if (
          yearKeys.includes(e.field) || 
-         e.field == "Change" ||
+         e.field.includes("Change") ||
          e.field == "Absenteeism" ||
          e.field == "Attendance"
       ) {
@@ -740,7 +744,8 @@ function createAgTable(tableData, tableID) {
          } else {
             header = e.field;
          }
-         if (e.field == "Change") {
+         if (e.field.includes("Change")) {
+            header = "Change"
             e.cellStyle = params => {
                if (params.value < 0) {
                   return { color: 'red' };
@@ -837,7 +842,6 @@ document.querySelectorAll('.button-tab')
       })
    );
 
-
 /* Popups */
 // Attach the event listener to the table because the table element
 // is immediately present in the DOM, unlike the the children elements 
@@ -886,6 +890,7 @@ stateInfoTable1.addEventListener('mousemove', (event) => {
 stateInfoTable1.addEventListener("mouseleave", function(event) {
    popup.style.display = "none";
 });
+
 
 /* Nav */
 var districtSelection = document.getElementById("districtSelect");
@@ -949,6 +954,21 @@ navTabs.onclick = ({target}) => {
    })
 };
 
+const analysisNavTabs = document.querySelector("div#analysis-nav-tabs"),
+      analysisNavTabElements = document.querySelectorAll("button[data-tab], div[data-tab]");
+
+analysisNavTabs.onclick = ({target}) => {
+   // ignore other clicks in this area (like spaces between buttons)
+   if (!target.matches("button[data-tab]")) return;
+
+   // cycling through "dataset" and setting class to active
+   // where the target.dataset equals the class
+   analysisNavTabElements.forEach(elTab => {
+      elTab.classList
+      .toggle("active", (elTab.dataset.tab===target.dataset.tab))
+   })
+};
+
 
 if (tabnavigation.addEventListener) {
    tabnavigation.addEventListener('click',navigateHandler,false);
@@ -957,11 +977,15 @@ else {
    tabnavigation.addEventListener('onclick',navigateHandler);
 };
 
+if (analysistabnavigation.addEventListener) {
+   analysistabnavigation.addEventListener('click',navigateHandler,false);
+}
+else {
+   analysistabnavigation.addEventListener('onclick',navigateHandler);
+};
 
 async function navigateHandler(e) {
    e = e || window.event;
-   console.log(e.target)
-   console.log(e.srcElement)
 
    const target = e.target || e.srcElement;
 
@@ -1202,6 +1226,8 @@ async function displayAnalysisTables(data) {
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
    let absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
+   let attendanceDiffLabel = document.getElementById("container-attendance-diff-label");
+   let attendanceSliceLabel = document.getElementById("container-attendance-slice-label");
 
    let absenteeismDiff = {},
        absenteeismSlice = {},
@@ -1209,36 +1235,56 @@ async function displayAnalysisTables(data) {
        attendanceSlice = {};
 
    const keyMap = {
-      'Absenteeism Difference': 'Change',
-      'Attendance Difference': 'Change',
+      'Absenteeism Difference': 'Absenteeism Change',
+      'Attendance Difference': 'Attendance Change',
       'Chronic Absenteeism': 'Absenteeism',
       'Attendance Rate': 'Attendance',
    };
 
-
+   // TODO STILL BROKEN CALCULATIONS //
+   console.log("LETS REVIEW")
+   console.log(data)
    if (data.some(obj => 'Absenteeism Difference' in obj)) {
-      let rawAbsenteeismDiff = data.filter(obj => obj['Absenteeism Difference'] > 0);
+      let rawAbsenteeismDiff = structuredClone(data);
+      rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+         obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075
+      )
+      console.log(rawAbsenteeismDiff)
       rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
       absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
       absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
-
-      let rawAbsenteeismSlice = data.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
+      
+      let rawAbsenteeismSlice = structuredClone(data);
+      rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
       rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
       absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
       absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
    }
 
    if (data.some(obj => 'Attendance Difference' in obj)) {
-      let rawAttendanceDiff = data.filter(obj => obj['Attendance Difference'] > 0);
-      rawAttendanceDiff.sort((a, b) => b['Attendance Difference'] - a['Attendance Difference']);
+      // let rawAttendanceDiff = data.filter(obj => obj['Attendance Difference'] < 0);
+      let rawAttendanceDiff = structuredClone(data);
+      rawAttendanceDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+         obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] < -0.075
+      )
+      rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
       attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
-      attendanceDiffLabel.firstChild.textContent = "Largest Attendance Decrease";
+      attendanceDiffLabel.firstChild.textContent = "Largest Attendance Changes";
 
-      let rawAttendanceSlice = data.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
+      let rawAttendanceSlice = structuredClone(data);
+      rawAttendanceSlice.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
       rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
       attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
       attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
    }
+   // console.log("absenteeismDiff")
+   // console.log(absenteeismDiff)
+   // console.log("absenteeismSlice")
+   // console.log(absenteeismSlice)
+   // console.log("attendanceDiff")
+   // console.log(attendanceDiff)
+   // console.log("attendanceSlice")
+   // console.log(attendanceSlice)
 
    var emptyTableOptions = {
       columnDefs: [
@@ -1271,7 +1317,7 @@ async function displayAnalysisTables(data) {
    if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
 
       // create table if it does not exist
-      if (absenteeismDiffGridApi == undefined) {
+      if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
 
          const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
          
@@ -1295,7 +1341,7 @@ async function displayAnalysisTables(data) {
 
       // create table if it does not exist
 
-      if (absenteeismDiffGridApi == undefined) {
+      if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
 
          const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
 
@@ -1311,46 +1357,129 @@ async function displayAnalysisTables(data) {
       }      
    };
 
-      /* Absenteeism Slice */
-      if (!Array.isArray(absenteeismSlice) || !absenteeismSlice.length) {
+   /* Absenteeism Slice */
+   if (!Array.isArray(absenteeismSlice) || !absenteeismSlice.length) {
 
-         if (absenteeismSliceGridApi == undefined) {
+      if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
 
-            const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
-            
-            emptyTableOptions.gridId = 'absenteeismSliceTable';
-            
-            absenteeismSliceGridApi = agGrid.createGrid(
-               absenteeismSliceTableGridDiv, emptyTableOptions
-               );
-
-         } else {
-            absenteeismSliceGridApi.setGridOption('columnDefs', []);
-            absenteeismSliceGridApi.setGridOption("rowData", []);
-            absenteeismSliceGridApi.showNoRowsOverlay();
-         }
-         } else {
-
-         let absenteeismSliceTableOptions = createAgTable(
-            absenteeismSlice, "absenteeismSliceTable"
-         );
-
-         if (absenteeismSliceGridApi == undefined) {
-
-            const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
-
-            absenteeismSliceGridApi = agGrid.createGrid(
-               absenteeismSliceTableGridDiv, absenteeismSliceTableOptions
-               );
-         }
-         else {
-            absenteeismSliceGridApi.setGridOption(
-               "columnDefs", absenteeismSliceTableOptions.columnDefs
+         const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
+         
+         emptyTableOptions.gridId = 'absenteeismSliceTable';
+         
+         absenteeismSliceGridApi = agGrid.createGrid(
+            absenteeismSliceTableGridDiv, emptyTableOptions
             );
-            absenteeismSliceGridApi.setGridOption("rowData", absenteeismSlice);
-         }      
-      };
 
+      } else {
+         absenteeismSliceGridApi.setGridOption('columnDefs', []);
+         absenteeismSliceGridApi.setGridOption("rowData", []);
+         absenteeismSliceGridApi.showNoRowsOverlay();
+      }
+      } else {
+
+      let absenteeismSliceTableOptions = createAgTable(
+         absenteeismSlice, "absenteeismSliceTable"
+      );
+
+      if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
+
+         const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
+
+         absenteeismSliceGridApi = agGrid.createGrid(
+            absenteeismSliceTableGridDiv, absenteeismSliceTableOptions
+            );
+      }
+      else {
+         absenteeismSliceGridApi.setGridOption(
+            "columnDefs", absenteeismSliceTableOptions.columnDefs
+         );
+         absenteeismSliceGridApi.setGridOption("rowData", absenteeismSlice);
+      }      
+   };
+
+   /* Attendance Diff */
+   if (!Array.isArray(attendanceDiff) || !attendanceDiff.length) {
+
+      // create table if it does not exist
+      if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+         const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+         
+         emptyTableOptions.gridId = 'attendanceDiffTable';
+         
+         attendanceDiffGridApi = agGrid.createGrid(
+            attendanceDiffTableGridDiv, emptyTableOptions
+            );
+
+      } else {
+         // if exists, but no data, show empty table
+         attendanceDiffGridApi.setGridOption('columnDefs', []);
+         attendanceDiffGridApi.setGridOption("rowData", []);
+         attendanceDiffGridApi.showNoRowsOverlay();
+      }
+   } else {
+
+      let attendanceDiffTableOptions = createAgTable(
+         attendanceDiff, "attendanceDiffTable"
+      );
+
+      // create table if it does not exist
+
+      if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+         const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+
+         attendanceDiffGridApi = agGrid.createGrid(
+            attendanceDiffTableGridDiv, attendanceDiffTableOptions
+            );
+      }
+      else {
+         attendanceDiffGridApi.setGridOption(
+            "columnDefs", attendanceDiffTableOptions.columnDefs
+         );
+         attendanceDiffGridApi.setGridOption("rowData", attendanceDiff);
+      }      
+   };
+
+   /* Attendance Slice */
+   if (!Array.isArray(attendanceSlice) || !attendanceSlice.length) {
+
+      if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+
+         const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
+         
+         emptyTableOptions.gridId = 'attendanceSliceTable';
+         
+         attendanceSliceGridApi = agGrid.createGrid(
+            attendanceSliceTableGridDiv, emptyTableOptions
+            );
+
+      } else {
+         attendanceSliceGridApi.setGridOption('columnDefs', []);
+         attendanceSliceGridApi.setGridOption("rowData", []);
+         attendanceSliceGridApi.showNoRowsOverlay();
+      }
+      } else {
+
+      let attendanceSliceTableOptions = createAgTable(
+         attendanceSlice, "attendanceSliceTable"
+      );
+
+      if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+
+         const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
+
+         attendanceSliceGridApi = agGrid.createGrid(
+            attendanceSliceTableGridDiv, attendanceSliceTableOptions
+            );
+      }
+      else {
+         attendanceSliceGridApi.setGridOption(
+            "columnDefs", attendanceSliceTableOptions.columnDefs
+         );
+         attendanceSliceGridApi.setGridOption("rowData", attendanceSlice);
+      }      
+   };
 }
 
 

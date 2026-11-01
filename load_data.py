@@ -252,36 +252,32 @@ def get_analysis_data(state_id):
     district_finance_data = district_finance_data.rename(
         columns=lambda x: f'Fnd_{x}' if x in clean_col_list else x
     )
-
-    # remove all funding cols except those in the list
-    # total_revenue_list = ["TotalStateAndLocalRevenue","TotalStateAid", "TotalStateRevenue"]    
-    # if any(item in clean_col_list for item in total_revenue_list):
-    #     remove_cols = [item for item in clean_col_list if "Total" not in item]
-    #     district_finance_data = district_finance_data.drop(
-    #         columns=district_finance_data.columns.intersection(remove_cols)
-    #     )
-        # numeric_col = [item for item in clean_col_list if item not in set(remove_cols)]
-        # district_finance_data[numeric_col] = district_finance_data[numeric_col].apply(pd.to_numeric, errors='coerce')
-    # else:
-    #     print("NO TOTAL REV")
-    #     print(clean_col_list)
-
+    
+    raw_attendance_data = raw_attendance_data[raw_attendance_data['District Name'] != "State Average"]
+    
+    # TODO: Trying to get a subsraction where one cell is NaN to result in NaN
+    raw_attendance_data["Chronic Absenteeism"] = raw_attendance_data["Chronic Absenteeism"].replace(
+        r"^\s*$", np.nan
+    )
+    raw_attendance_data["Attendance Rate"] = raw_attendance_data["Attendance Rate"].replace(
+        r"^\s*$", np.nan
+    )
+    
     merged_data = pd.merge(
         raw_attendance_data, district_finance_data, on='Entity ID', how='left'
     )
-
+    
     # get year list, keep most recent two years and drop rest
     year_list = sorted(merged_data['Year'].unique().tolist(), reverse=True)
     keep_years = year_list[:2]
     
-    # get abesnteeism/attendance difference from most current and previous year if values exist
+    # get abesnteeism/attendance difference from most current and previous year
+    # if values exist
     if len(keep_years) > 1:
         first_yr = merged_data[merged_data['Year'] == keep_years[0]].copy()
         second_yr = merged_data[merged_data['Year'] == keep_years[1]].copy()
 
         analysis_df = pd.merge(first_yr, second_yr, on="Entity ID", suffixes=("_cur", "_prev"))
-        
-
         
         # Subtract the values to find the difference for both and add to analysis_df
         # if present. Then add to result, which merges the 'current year' to the
@@ -294,9 +290,11 @@ def get_analysis_data(state_id):
             analysis_df["Absenteeism Difference"] = analysis_df["Chronic Absenteeism_cur"] - analysis_df["Chronic Absenteeism_prev"]
             merge_cols.extend(["Absenteeism Difference"])
 
+
         if "Attendance Rate_cur" in analysis_df.columns and (
             ~analysis_df["Attendance Rate_cur"].isna().all() and ~analysis_df["Attendance Rate_prev"].isna().all()
         ):
+            # analysis_df = analysis_df.dropna(subset=["Attendance Rate_cur", "Attendance Rate_prev"])
             analysis_df["Attendance Difference"] = analysis_df["Attendance Rate_cur"] - analysis_df["Attendance Rate_prev"]
             merge_cols.extend(["Attendance Difference"])
         
@@ -310,18 +308,20 @@ def get_analysis_data(state_id):
         print("EMPTYS")
         result_df = merged_data.copy()
 
-    # Last step is to add prior year data (if it exits) if either Absenteeism or
+    result_df.to_csv('result_df.csv', index=False) #NOTE: Test
+    
+    # NOTE: Last step is to add prior year data (if it exits) if either Absenteeism or
     # Attendance column is null for the current year- adding a "Fill Year" allows
     # us to test for the presence of prev year data
-    if (result_df['Attendance Rate'].isna().all() and ~second_yr['Attendance Rate'].isna().all()):
-        result_df = result_df.drop(columns=['Attendance Rate'])
-        result_df = result_df.merge(second_yr[['Entity ID', 'Attendance Rate']], on='Entity ID', how='left')
-        result_df['Fill Year'] = keep_years[1]
+    # if (result_df['Attendance Rate'].isna().all() and ~second_yr['Attendance Rate'].isna().all()):
+    #     result_df = result_df.drop(columns=['Attendance Rate'])
+    #     result_df = result_df.merge(second_yr[['Entity ID', 'Attendance Rate']], on='Entity ID', how='left')
+    #     result_df['Fill Year'] = keep_years[1]
             
-    if (result_df['Chronic Absenteeism'].isna().all() and ~second_yr['Chronic Absenteeism'].isna().all()):
-        result_df = result_df.drop(columns=['Chronic Absenteeism'])
-        result_df = result_df.merge(second_yr[['Entity ID', 'Chronic Absenteeism']], on='Entity ID', how='left')
-        result_df['Fill Year'] = keep_years[1]
+    # if (result_df['Chronic Absenteeism'].isna().all() and ~second_yr['Chronic Absenteeism'].isna().all()):
+    #     result_df = result_df.drop(columns=['Chronic Absenteeism'])
+    #     result_df = result_df.merge(second_yr[['Entity ID', 'Chronic Absenteeism']], on='Entity ID', how='left')
+    #     result_df['Fill Year'] = keep_years[1]
 
     # district_data.to_csv('test-district_data.csv', index=False) #NOTE: Test
 
