@@ -1,12 +1,13 @@
 // table processing functions
 // author:   jbetley (https://github.com/jbetley)
 // version:  1.04
-// date:     04/07/26
+// date:     11/01/26
 
 
 // Table Formatting Functions //
 function moneyFormatter(params) {
-   if (params.value == undefined) {
+   console.log(params.value)
+   if (params.value == undefined || params.value == "") {
       return '\u2014'
    }
    else {
@@ -51,6 +52,21 @@ function percentFormatter(params) {
    }
 };
 
+// adds a "+" sign to positive values
+function styledPercentFormatter(params) {
+   if (params.value == undefined || params.value == "") {
+      return '\u2014'
+   }
+   else {
+      const val = params.value * 100;
+      var formatted = val.toFixed(2);
+      if (formatted > 0) {
+         return '+' + `${formatted}` + '%';
+      } else {
+         return `${formatted}` + '%';
+      }
+   }
+};
 
 // Fade a div out or in. duration is ms; default is fade out,
 // set fadeOut to false to fade in

@@ -130,6 +130,8 @@
 </body>
 <script type="module">
 
+const isEmpty = val => val === 0 || val === null || val === undefined || val == "";
+
 // The district list is not necessarily the same in the funding
 // table (districts) and attendance table (attendance). This is
 // because we want to include charter schools in our attendance
@@ -186,6 +188,8 @@ const absentMsg = document.getElementById("absent-msg");
 const analysisTabsContainer = document.getElementById("analysis-tabs-container");
 
 
+// TODO: MOVE TO SEPARATE FILE:
+// https://www.google.com/search?q=javascript+move+all+await+fetch+functions+to+separate+file&sca_esv=944f62e43ba88c4b&biw=1654&bih=1013&sxsrf=AKL5yDi0LqYmrNYywHW6zNw8lE57civerQ%3A1793556018698&ei=Mn7naqaWKoLsmLQP5_mumA8&uact=5&oq=javascript+move+all+await+fetch+functions+to+separate+file&gs_lp=Egxnd3Mtd2l6LXNlcnAiOmphdmFzY3JpcHQgbW92ZSBhbGwgYXdhaXQgZmV0Y2ggZnVuY3Rpb25zIHRvIHNlcGFyYXRlIGZpbGUyBRAhGKABMgUQIRigATIFECEYoAEyBRAhGKABMgUQIRigATIFECEYqwIyBRAhGKsCSLXNAVCVB1i-zAFwAXgAkAEAmAFmoAGmHKoBBDQ2LjG4AQPIAQD4AQGYAi-gAooiwgILEAAYgAQYigUYkQLCAgUQABiABMICChAAGIAEGIoFGEPCAggQABiABBi0B8ICBhAAGBYYHsICBRAAGO8FwgIIEAAYiQUYogTCAgsQABiABBiKBRiGA8ICBRAhGJ8FmAMAiAYBkgcFMzYuMTGgB9TrArIHBTM2LjExuAeKIsIHBDItNDfIB9sBgAgB&sclient=gws-wiz-serp
 async function getStateData(select) {
    const data = await fetch(`${window.origin}/states`, {
       method: "POST",
@@ -632,6 +636,7 @@ async function setDistrictList() {
 
 // This function must be located in in index.html so
 // getSingleDistrictData() is in scope
+
 // TODO: DOes it though? Move get_single_district_data to table helpers? or move
 // TODO: all of the getter functions to their own file?
 // TODO: REWORK THIS
@@ -639,12 +644,13 @@ function createAgTable(tableData, tableID) {
 
    // because we don't know what the fund titles will be, we
    // need to mark them with the Fnd_ prefix for identification,
-   // but not display purposes.
+   // but not display purposes. Used by fundingTable and analysisTable.
    const fndSubstring='Fnd_';
 
    let allFndKeys = tableData.flatMap(obj => 
       Object.keys(obj).filter(key => key.includes(fndSubstring))
       );
+
    let fndKeys = [...new Set(allFndKeys)];
 
    let keys = Object.keys(tableData.reduce(function(result, obj) {
@@ -655,12 +661,12 @@ function createAgTable(tableData, tableID) {
 
    let totalCol = keys.filter(item => item.includes("Total"));
 
-   // get keys (columns) in correct order
+   // tableId determines which table(s) to display
    if (tableID == "attendanceTable") {
 
-      // get list of years and sort descending
       const infoCols = ["District Name", "Entity ID"]
-
+      
+      //keys (columns) must be in display order
       yearKeys = keys.filter(item => !infoCols.includes(item));
 
       // We only want to display 3 years at a time
@@ -678,15 +684,15 @@ function createAgTable(tableData, tableID) {
       keys = keys.filter(item => item != "District Name");
       keys.unshift("District Name")
 
-      // Ensure "Total" col is in the 4th position in the list
+      // Ensure "Total Funding" col is in the 4th position in the list
       const highLightIdx = keys.indexOf(totalCol[0]);
-
       if (highLightIdx !== -1) {
          keys.splice(highLightIdx, 1); // Remove 1 element at the found index
          keys.splice(3, 0, totalCol[0]);
       }
 
    } else if (tableID.includes('Diff') || tableID.includes('Slice')) {
+      
       if (tableID.includes('absenteeism')) {
          keys = [
             'District Name', 'Absenteeism', 'Absenteeism Change', totalCol[0]
@@ -700,8 +706,8 @@ function createAgTable(tableData, tableID) {
 
    let columns = keys.map(field => ({field}));
 
+   // this is messy, but covers all five types of tables
    columns.forEach(function(e) {
-      
       if (e.field == "District Name") {
          e.valueFormatter = "";
          e.resizable = false;
@@ -711,6 +717,7 @@ function createAgTable(tableData, tableID) {
          e.maxWidth = 125;
          e.cellClass = "ag-left-aligned-cell";
          e.headerClass = "text-center";
+
       } else if (e.field == "Entity ID") {
          e.valueFormatter = blankFormatter;
          e.flex = 1;
@@ -720,6 +727,7 @@ function createAgTable(tableData, tableID) {
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
          e.headerName = "ID"
+
       } else if (e.field == "Fund Year") {
          e.valueFormatter = blankFormatter;
          e.flex = 1;
@@ -729,8 +737,8 @@ function createAgTable(tableData, tableID) {
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
          e.headerName = "Year"
-      } 
-      else if (
+
+      } else if (
          yearKeys.includes(e.field) || 
          e.field.includes("Change") ||
          e.field == "Absenteeism" ||
@@ -744,6 +752,7 @@ function createAgTable(tableData, tableID) {
          } else {
             header = e.field;
          }
+
          if (e.field.includes("Change")) {
             header = "Change"
             e.cellStyle = params => {
@@ -755,16 +764,18 @@ function createAgTable(tableData, tableID) {
                }
                return null;
             };
+            e.valueFormatter = styledPercentFormatter;
+         } else {
+            e.valueFormatter = percentFormatter;
          }
 
-         e.valueFormatter = percentFormatter;
          e.flex = 1;
          e.resizable = false;
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
          e.headerName = header;
-      }
-      else if (totalCol.includes(e.field)) { // fund total col
+
+      } else if (totalCol.includes(e.field)) { // fund total col
          
          // slightly larger and bolder
          e.valueFormatter = moneyFormatter;
@@ -897,7 +908,6 @@ var districtSelection = document.getElementById("districtSelect");
 var stateSelection = document.getElementById("stateSelect");
 
 stateSelection.addEventListener("change", async () => {
-
 
    await getStateData(stateSelection.value);
    await getSingleDistrictData(stateSelection.value, districtSelection.value);
@@ -1224,10 +1234,18 @@ async function displayAnalysisTables(data) {
    }
 
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
+
    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
+   absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Change";
+
    let absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
+   absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
+   
    let attendanceDiffLabel = document.getElementById("container-attendance-diff-label");
+   attendanceDiffLabel.firstChild.textContent = "Largest Attendance Change";
+
    let attendanceSliceLabel = document.getElementById("container-attendance-slice-label");
+   attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
 
    let absenteeismDiff = {},
        absenteeismSlice = {},
@@ -1241,42 +1259,46 @@ async function displayAnalysisTables(data) {
       'Attendance Rate': 'Attendance',
    };
 
-   // TODO STILL BROKEN CALCULATIONS //
-   console.log("LETS REVIEW")
-   console.log(data)
-   if (data.some(obj => 'Absenteeism Difference' in obj)) {
-      let rawAbsenteeismDiff = structuredClone(data);
-      rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
-         obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075
-      )
-      console.log(rawAbsenteeismDiff)
-      rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
-      absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
-      absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
-      
+   // const isEmpty = val => val === 0 || val === null || val === undefined || val === "";
+
+   // If all CA data is empty, there will be neither a Slice nor a Diff, if there
+   // is CA data AND there is a "Difference" key, we will have a Diff and a
+   // Slice. If there is no "Difference" key, but CA has data, we will only have
+   // a Slice.
+   if(!data.every(obj => isEmpty(obj["Chronic Absenteeism"]))) {
+
+      if (data.some(obj => 'Absenteeism Difference' in obj)) {
+         let rawAbsenteeismDiff = structuredClone(data);
+         rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075
+         )
+         rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
+         absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
+      }
+
       let rawAbsenteeismSlice = structuredClone(data);
       rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
       rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
       absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
-      absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
    }
 
-   if (data.some(obj => 'Attendance Difference' in obj)) {
-      // let rawAttendanceDiff = data.filter(obj => obj['Attendance Difference'] < 0);
-      let rawAttendanceDiff = structuredClone(data);
-      rawAttendanceDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
-         obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] < -0.075
-      )
-      rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
-      attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
-      attendanceDiffLabel.firstChild.textContent = "Largest Attendance Changes";
+   if(!data.every(obj => isEmpty(obj["Attendance Rate"]))) {
+
+      if (data.some(obj => 'Attendance Difference' in obj)) {
+         let rawAttendanceDiff = structuredClone(data);
+         rawAttendanceDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] < -0.075
+         )
+         rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
+         attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
+      }
 
       let rawAttendanceSlice = structuredClone(data);
       rawAttendanceSlice.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
       rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
       attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
-      attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
    }
+
    // console.log("absenteeismDiff")
    // console.log(absenteeismDiff)
    // console.log("absenteeismSlice")
@@ -1625,7 +1647,8 @@ async function displayAttendanceTables(data) {
 
          // remove rows if the two most recent years are 0, null, or undefined
          let attendanceCleaned = attendanceMerged.filter(obj => {
-            const isEmpty = val => val === 0 || val === null || val === undefined;
+
+            // const isEmpty = val => val === 0 || val === null || val === undefined;
             return !(isEmpty(obj[removeCols[0]]) && isEmpty(obj[removeCols[1]]));
          });
 
@@ -1702,7 +1725,6 @@ async function displayAttendanceTables(data) {
          const removeCols = yearCols.slice(0, 2);
 
          let cleanedData = absenteeismMerged.filter(obj => {
-            const isEmpty = val => val === 0 || val === null || val === undefined;
             return !(isEmpty(obj[removeCols[0]]) && isEmpty(obj[removeCols[1]]));
          });
 
