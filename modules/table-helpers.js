@@ -6,7 +6,6 @@
 
 // Table Formatting Functions //
 function moneyFormatter(params) {
-   console.log(params.value)
    if (params.value == undefined || params.value == "") {
       return '\u2014'
    }

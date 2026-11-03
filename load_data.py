@@ -305,10 +305,9 @@ def get_analysis_data(state_id):
             how='left'
         )
     else:
-        print("EMPTYS")
         result_df = merged_data.copy()
 
-    result_df.to_csv('result_df.csv', index=False) #NOTE: Test
+    # result_df.to_csv('result_df.csv', index=False) #NOTE: Test
     
     # NOTE: Last step is to add prior year data (if it exits) if either Absenteeism or
     # Attendance column is null for the current year- adding a "Fill Year" allows
@@ -332,8 +331,6 @@ def get_analysis_data(state_id):
 # are not unique across the entire table)
 def get_single_district_data(data):
     # data is in format [StateAbbreviation, EntityID]
-    print('Getting Single')
-    print(data)
     params = {
         "state": data[0],
         "district": data[1]
