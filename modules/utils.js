@@ -51,6 +51,8 @@
  * @property {String} TitleI
  */
 
+
+
 // TODO: Fix the Year type discrepancy
 /** Note: Year is a string in format YYYY and there can be one or more Years.
  * @typedef {{DistrictName:String, EntityID:String, [Year:String]:Any}} AttendanceData
@@ -60,6 +62,23 @@
  * @typedef {{DistrictName:String, EntityID:String, [Year:Number]:Any}} AbsenteeismData
 */
 
+/**
+ * executes a click handler immediately on the first click but block
+ * all subsequent clicks for a specified timeframe
+ * @param {Function} func array of objects
+ * @param {Number} delay array of strings (key names)
+ */
+function throttle(func, delay) {
+  let lastTime = 0;
+  return function(...args) {
+    const now = Date.now();
+    // Only execute if the specified delay has passed since the last execution
+    if (now - lastTime >= delay) {
+      lastTime = now;
+      func.apply(this, args);
+    }
+  };
+}
 
 /**
  * reorders keys of array of objects based on passed list
@@ -76,6 +95,26 @@ function reorderKeys(arr, order) {
   });
 };
 
+/**
+ * replaces keys in acordance with passed keymap object
+ * @param {Array<Object>} data array of objects
+ * @param {Object} keyMap array of strings (key names)
+ * @returns {Array<Object>} array of objects with new keys
+ */
+function replaceKeys(data,keyMap) {
+  let newkeys = data.map(obj => {
+     const newObj = {};
+     for (const key in obj) {
+        if (keyMap[key]) {
+           newObj[keyMap[key]] = obj[key]; // Rename if it exists in map
+        } else {
+           newObj[key] = obj[key]; // Keep original key
+        }
+     }
+     return newObj;
+  });
+  return newkeys
+}
 
 /**
  * Given an array and a key, find the maximum length for all

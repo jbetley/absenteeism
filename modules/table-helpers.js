@@ -288,8 +288,10 @@ function allocationsTable(object, id) {
    allocationsTableDiv.appendChild(table);
 };
 
+// TODO: DONT ADD THE ROW AT ALL IF THE DATA DOESNT EXIST FOR THE ITEM
 
 // programatically create specific basic html table (School District Info)
+// as a fragment() - nothing added to Dom until table is assembled
 function districtInfoTable(data, id) {
 
    let districtInfoTableDiv = document.getElementById(id);
@@ -298,9 +300,10 @@ function districtInfoTable(data, id) {
 
    districtInfoTableDiv.innerHTML = '';
 
-   var table = document.createElement('TABLE');
+   const fragment = document.createDocumentFragment();
+   const table = document.createElement('TABLE');
    table.border = '0';
-   var tableBody = document.createElement('TBODY');
+   const tableBody = document.createElement('TBODY');
    table.appendChild(tableBody);
 
    // in addition to missing data, data may be undefined if "State" or a
@@ -310,6 +313,7 @@ function districtInfoTable(data, id) {
 
       for (var row = 0; row < 7; row++) {
          var tr = document.createElement('TR');
+
          tableBody.appendChild(tr);
 
          for (var col = 0; col < 2; col++) {
@@ -351,7 +355,7 @@ function districtInfoTable(data, id) {
                let type;
 
                if (data['Type'].includes('Charter')) {
-                  type = 'Charter School'
+                  type = 'Charter District'
                } else {
                   type = 'School District'
                }
@@ -362,6 +366,14 @@ function districtInfoTable(data, id) {
                }
             }
             else if (row == 4) {
+               if (col==0) {
+                  td.appendChild(document.createTextNode("Total Enrollment:"));
+               } else {
+                  const enrollment = accountingFormatter({'value': data["Enrollment"]});
+                  td.appendChild(document.createTextNode(enrollment));
+               }
+            }
+            else if (row == 5) {
                let name, val;
                if (data['Type'].includes('Charter')) {
                   name = ''
@@ -376,34 +388,28 @@ function districtInfoTable(data, id) {
                   td.appendChild(document.createTextNode(val));
                }
             }
-            else if (row == 5) {
-               if (col==0) {
-                  td.appendChild(document.createTextNode("Total Enrollment:"));
-               } else {
-                  const enrollment = accountingFormatter({'value': data["Enrollment"]});
-                  td.appendChild(document.createTextNode(enrollment));
-               }
-            }         
             tr.appendChild(td);
          }
       }
    } 
-else {
-   var tr = document.createElement('TR');
-   tableBody.appendChild(tr);
-   var td = document.createElement('TD');
-   td.width = '100%';
-   td.height = '50%';
-   td.style.fontWeight = 'bold';
-   td.appendChild(document.createTextNode("No Data to Display."));
-   tr.appendChild(td);
-}
+   else {
+      var tr = document.createElement('TR');
+      tableBody.appendChild(tr);
+      var td = document.createElement('TD');
+      td.width = '100%';
+      td.height = '50%';
+      td.style.fontWeight = 'bold';
+      td.appendChild(document.createTextNode("No Data to Display."));
+      tr.appendChild(td);
+   }
    
    // Fade in. The timeout interval must be at least equal to the fade out
    // duration, if it is less than the fade duration, the animation will
    // trigger one too many times causing the div to remain faded out
    setTimeout(() => {
-      districtInfoTableDiv.appendChild(table);
+      // districtInfoTableDiv.appendChild(table);
+      fragment.appendChild(table);
+      districtInfoTableDiv.appendChild(fragment);
       fadeDiv(districtInfoTableDiv, 250, false);
       }, 300);
 };

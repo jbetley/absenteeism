@@ -123,7 +123,8 @@
                <div class="attendance-slice-grid">
                   <div class="header-box label" id="container-attendance-slice-label"><div id="attendance-slice-label" class="label__header"></div></div>
                   <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>               
+               </div>
+               <div id="elementExists" style="display: none"></div>
          </div>            
       </div>
    </div>
@@ -131,6 +132,7 @@
 <script type="module">
 
 const isEmpty = val => val === 0 || val === null || val === undefined || val == "";
+const elementExists = document.querySelector('#elementExists');
 
 // The district list is not necessarily the same in the funding
 // table (districts) and attendance table (attendance). This is
@@ -814,22 +816,55 @@ function createAgTable(tableData, tableID) {
       }
    });
 
-
+   let clickTimeout = null;
    // Resets district info table when the respective district
    // funding row table is clicked - do nothing if "State
    // Average" is clicked
    let options = {
       columnDefs: columns,
-      onRowClicked: function (e) {
-         const schoolName = e.data["District Name"];
-         const state = stateSelection.value;
-         if (schoolName != "State Average") {
-            const id = e.data["Entity ID"];
-            // set district selection equal to row selection
-            districtSelection.value = id;
-            getSingleDistrictData(state, id);
-         }
-      },
+      onRowClicked: (params) => {
+         // If a user clicks a district twice in quick succession,
+         // the table gets appended twice- clickTimeout waits 250ms
+         // to see if there is a second click and if so, blocks it. Not the
+         // best solution because it does nothing on a double-click and a
+         // second table can still be appended if the user double clicks with
+         // the second click just outside the 250ms check period.
+         // NOTE: Revisit this later.
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            clickTimeout = null;
+            return; 
+        }
+
+        // Set timeout to delay the single click action
+        clickTimeout = setTimeout(() => {
+            const schoolName = params.data["District Name"];
+            const state = stateSelection.value;
+            if (schoolName != "State Average") {
+               const id = params.data["Entity ID"];
+               // set district selection equal to row selection
+               districtSelection.value = id;
+               getSingleDistrictData(state, id);
+            }
+            
+            clickTimeout = null; // Reset after executing
+        }, 250); // 250ms is standard double-click threshold
+    },
+
+    onRowDoubleClicked: (params) => {
+        // Do nothing if double-clicked
+    },
+      // NOTE: original code
+      // onRowClicked: function (e) {
+      //    const schoolName = e.data["District Name"];
+      //    const state = stateSelection.value;
+      //    if (schoolName != "State Average") {
+      //       const id = e.data["Entity ID"];
+      //       // set district selection equal to row selection
+      //       districtSelection.value = id;
+      //       getSingleDistrictData(state, id);
+      //    }
+      // },
       rowData: tableData,
       gridId: tableID,
       tooltipShowDelay: 0,
@@ -1143,7 +1178,6 @@ async function displayStateInfoTables(data) {
 async function displayDistrictInfoTable(data) {
 
    const districtName = districtSelection.options[districtSelection.selectedIndex].text;
-
    let districtLabel = document.getElementById("container-district-label");
    districtLabel.firstChild.textContent = districtName + " Overview";
 
@@ -1218,21 +1252,6 @@ async function displayDistrictTitleTable(data) {
 
 async function displayAnalysisTables(data) {
 
-   function replaceKeys(data,keymap) {
-      let newkeys = data.map(obj => {
-         const newObj = {};
-         for (const key in obj) {
-            if (keyMap[key]) {
-               newObj[keyMap[key]] = obj[key]; // Rename if it exists in map
-            } else {
-               newObj[key] = obj[key]; // Keep original key
-            }
-         }
-         return newObj;
-      });
-      return newkeys
-   }
-
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
 
    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
@@ -1270,13 +1289,20 @@ async function displayAnalysisTables(data) {
       if (data.some(obj => 'Absenteeism Difference' in obj)) {
          let rawAbsenteeismDiff = structuredClone(data);
          rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
-            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075
+            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075 &&
+            obj['Chronic Absenteeism'] < .85
          )
          rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
          absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
       }
 
       let rawAbsenteeismSlice = structuredClone(data);
+
+      // drop districts with absenteeism of 85% or higher - districts with absenteeism
+      // this high are almost always specialty schools (e.g., adult)
+      rawAbsenteeismSlice = rawAbsenteeismSlice.filter(
+         obj => obj['Chronic Absenteeism'] !="" && obj['Chronic Absenteeism'] < .85
+      )
       rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
       rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
       absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
