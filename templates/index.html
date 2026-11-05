@@ -124,7 +124,6 @@
                   <div class="header-box label" id="container-attendance-slice-label"><div id="attendance-slice-label" class="label__header"></div></div>
                   <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
                </div>
-               <div id="elementExists" style="display: none"></div>
          </div>            
       </div>
    </div>
@@ -132,7 +131,6 @@
 <script type="module">
 
 const isEmpty = val => val === 0 || val === null || val === undefined || val == "";
-const elementExists = document.querySelector('#elementExists');
 
 // The district list is not necessarily the same in the funding
 // table (districts) and attendance table (attendance). This is
@@ -231,8 +229,7 @@ async function getAllDistrictData(state, district) {
          } else {
             alert("Network Error: Could not load data.")
          }
-      });
-
+   });
    displayDistrictTitleTable(data);
 };
 
@@ -256,7 +253,6 @@ async function getSingleDistrictData(state, district) {
             alert("Network Error: Could not load data.")
          }
    });
-
    displayDistrictInfoTable(data);
 };
 
@@ -278,7 +274,7 @@ async function getAttendanceData(state, district) {
          } else {
             alert("Network Error: Could not load data.")
          }
-      });
+   });
    displayAttendanceTables(data);
 };
 
@@ -300,8 +296,7 @@ async function getAnalysisData(state) {
          } else {
             alert("Network Error: Could not load data.")
          }
-      });
-
+   });
    displayAnalysisTables(data);
 };
 
@@ -542,7 +537,7 @@ async function setStateList() {
       item => [item["State Abbreviation"], item]
    )).values()];
 
-   // remove territories and Bureau of Indian affairs - want to
+   // remove territories and Bureau of Indian affairs - but
    // leave them in the data just in case
    const removeStates = ['BI', 'GU', 'VI', 'PR', 'MP'];
    uniqueStates = uniqueStates.filter(obj => !removeStates.includes(obj["State Abbreviation"]));
@@ -638,14 +633,13 @@ async function setDistrictList() {
 
 // This function must be located in in index.html so
 // getSingleDistrictData() is in scope
-
 // TODO: DOes it though? Move get_single_district_data to table helpers? or move
 // TODO: all of the getter functions to their own file?
-// TODO: REWORK THIS
+// TODO: REWORK THIS - it messy
 function createAgTable(tableData, tableID) {
 
    // because we don't know what the fund titles will be, we
-   // need to mark them with the Fnd_ prefix for identification,
+   // need to mark them with the Fnd_ prefix for later identification,
    // but not display purposes. Used by fundingTable and analysisTable.
    const fndSubstring='Fnd_';
 
@@ -769,7 +763,7 @@ function createAgTable(tableData, tableID) {
             e.valueFormatter = styledPercentFormatter;
          } else {
             e.valueFormatter = percentFormatter;
-         }
+         };
 
          e.flex = 1;
          e.resizable = false;
@@ -777,7 +771,7 @@ function createAgTable(tableData, tableID) {
          e.headerClass = "text-center";
          e.headerName = header;
 
-      } else if (totalCol.includes(e.field)) { // fund total col
+      } else if (totalCol.includes(e.field)) { // fund 'total' col
          
          // slightly larger and bolder
          e.valueFormatter = moneyFormatter;
@@ -838,9 +832,9 @@ function createAgTable(tableData, tableID) {
 
         // Set timeout to delay the single click action
         clickTimeout = setTimeout(() => {
-            const schoolName = params.data["District Name"];
+            const districtlName = params.data["District Name"];
             const state = stateSelection.value;
-            if (schoolName != "State Average") {
+            if (districtlName != "State Average") {
                const id = params.data["Entity ID"];
                // set district selection equal to row selection
                districtSelection.value = id;
@@ -967,6 +961,7 @@ stateSelection.addEventListener("change", async () => {
 });
 
 
+// TODO: How should this work for Analysis
 districtSelection.addEventListener("change", async () => {
    
    const pageTab = document.querySelector(".tab.main.active").id;
@@ -978,8 +973,6 @@ districtSelection.addEventListener("change", async () => {
       await getSingleDistrictData(stateSelection.value, districtSelection.value);
       await getAllDistrictData(stateSelection.value, districtSelection.value);
    }
-
-   // TODO: NEED thIS FOR ANALSIS?
 });
 
 
@@ -1178,6 +1171,7 @@ async function displayStateInfoTables(data) {
 async function displayDistrictInfoTable(data) {
 
    const districtName = districtSelection.options[districtSelection.selectedIndex].text;
+
    let districtLabel = document.getElementById("container-district-label");
    districtLabel.firstChild.textContent = districtName + " Overview";
 
@@ -1255,13 +1249,13 @@ async function displayAnalysisTables(data) {
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
 
    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
-   absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Change";
+   absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
 
    let absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
    absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
    
    let attendanceDiffLabel = document.getElementById("container-attendance-diff-label");
-   attendanceDiffLabel.firstChild.textContent = "Largest Attendance Change";
+   attendanceDiffLabel.firstChild.textContent = "Largest Attendance Decrease";
 
    let attendanceSliceLabel = document.getElementById("container-attendance-slice-label");
    attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
@@ -1277,8 +1271,6 @@ async function displayAnalysisTables(data) {
       'Chronic Absenteeism': 'Absenteeism',
       'Attendance Rate': 'Attendance',
    };
-
-   // const isEmpty = val => val === 0 || val === null || val === undefined || val === "";
 
    // If all CA data is empty, there will be neither a Slice nor a Diff, if there
    // is CA data AND there is a "Difference" key, we will have a Diff and a
@@ -1312,8 +1304,8 @@ async function displayAnalysisTables(data) {
 
       if (data.some(obj => 'Attendance Difference' in obj)) {
          let rawAttendanceDiff = structuredClone(data);
-         rawAttendanceDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
-            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] < -0.075
+         rawAttendanceDiff = data.filter(obj => obj['Attendance Rate'] !="" &&
+            obj['Attendance Difference'] !="" && obj['Attendance Difference'] < -0.075
          )
          rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
          attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
@@ -1324,15 +1316,6 @@ async function displayAnalysisTables(data) {
       rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
       attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
    }
-
-   // console.log("absenteeismDiff")
-   // console.log(absenteeismDiff)
-   // console.log("absenteeismSlice")
-   // console.log(absenteeismSlice)
-   // console.log("attendanceDiff")
-   // console.log(attendanceDiff)
-   // console.log("attendanceSlice")
-   // console.log(attendanceSlice)
 
    var emptyTableOptions = {
       columnDefs: [
@@ -1361,8 +1344,7 @@ async function displayAnalysisTables(data) {
       },
    };
 
-   console.log("DATA CHECK")
-   console.log(data)
+
    /* Absenteeism Diff */
    if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
 

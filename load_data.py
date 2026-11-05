@@ -156,7 +156,7 @@ def get_all_district_data(data):
             """,
         )
         
-    district_data = run_query(q, params)
+    district_info_data = run_query(q, params)
 
     # get funding data to add to district_info_data
     q2 = text(
@@ -191,19 +191,20 @@ def get_all_district_data(data):
         tagged_col_list = [col for col in district_finance_data.columns if col not in exclude_set]
         
         merged_data = pd.merge(
-            district_data, district_finance_data, on='Entity ID', how='left')
+            district_info_data, district_finance_data, on='Entity ID', how='left')
         
         merged_data.dropna(subset=tagged_col_list, how='all', inplace=True)
         
         # after merging, find the name of the funding column that contains
         # the absolute max value and sort by that column
         # max_value = merged_data[tagged_col_list].max().max()
+
         max_column = merged_data[tagged_col_list].max().idxmax()
 
         merged_data = merged_data.sort_values(by=max_column, ascending=False)
         
     else:
-        merged_data = district_data.copy()
+        merged_data = district_info_data.copy()
         
     # district_data.to_csv('test-district_data.csv', index=False) #NOTE: Test
 

@@ -449,7 +449,6 @@ select:focus {
 }
 
 #attend-msg-container {
-  /* height: 20px; */
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
@@ -472,7 +471,6 @@ select:focus {
 }
 
 #absent-msg-container {
-  /* height: 20px; */
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
@@ -681,7 +679,6 @@ select:focus {
   width: 100%;
 }
 
-/* This affects all headers */ 
 .ag-theme-quartz .ag-header {
   font-family: 'Inter', sans-serif;
 }
