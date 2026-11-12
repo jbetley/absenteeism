@@ -12,6 +12,7 @@ class CustomNoRowsOverlay  {
         return this.eGui;
     }
 
+
     refresh(params) {
         this.eGui.innerHTML = `
             <div role="presentation" style="background-color: #F2F2F2;">

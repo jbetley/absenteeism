@@ -41,89 +41,98 @@
    <div id ="tabnavigation">
       <div class="row">
          <div class="nav-container twelve columns">
-            <div id="nav-tabs" class="nav">
-               <button data-tab="tab-n-1" id="fundingTab" class="tab main active">District Funding</button>
-               <button data-tab="tab-n-2" id="attendanceTab" class="tab main">Attendance Data</button>
-               <button data-tab="tab-n-3" id="analysisTab" class="tab main">State Analysis</button>
+            <div id="main-nav-tabs" class="nav">
+               <button id="fundingTab" class="tab main active">District Funding</button>
+               <button id="attendanceTab" class="tab main">Attendance Data</button>
+               <button id="analysisTab" class="tab main">State Analysis</button>
             </div>
+            <!-- <div id="nav-tabs" class="nav">
+               <button type="button" data-tab="tab-n-1" id="fundingTab" class="tab main active">District Funding</button>
+               <button type="button" data-tab="tab-n-2" id="attendanceTab" class="tab main">Attendance Data</button>
+               <button type="button" data-tab="tab-n-3" id="analysisTab" class="tab main">State Analysis</button>
+            </div> -->
          </div>
       </div>
    </div>
    <div class="panel-container">
       <div class="row">
          <div class="parent">
-               <div class="state-grid">
-                  <div class="header-box persistent label" id="container-state-label"><div id="state-label" class="label__header"></div></div>
-                  <div class="state-box" id="container-state-info">
-                     <div class="state-table-1">
-                        <div class="table-title" id="table-1-title"></div>
-                        <div id="state-info-table-1"></div>
-                        <div class="popup" id="state-popup" style="display: none;"></div>
-                     </div>
-                     <div class="state-table-2">
-                        <div class="table-title" id="table-2-title"></div>
-                        <div id="state-info-table-2"></div>
-                     </div>
+            <div class="state-grid">
+               <div class="header-box persistent label" id="container-state-label"><div id="state-label" class="label__header"></div></div>
+               <div class="state-box" id="container-state-info">
+                  <div class="state-table-1">
+                     <div class="table-title" id="table-1-title"></div>
+                     <div id="state-info-table-1"></div>
+                     <div class="popup" id="state-popup" style="display: none;"></div>
+                  </div>
+                  <div class="state-table-2">
+                     <div class="table-title" id="table-2-title"></div>
+                     <div id="state-info-table-2"></div>
                   </div>
                </div>
-               <div class="district-grid">
-                  <div class="header-box persistent label" id="container-district-label"><div id="district-label" class="label__header"></div></div>
-                  <div class="district-box" id="container-district-info">
-                     <div class="district-table" id="district-info-table"></div>
-                  </div>
+            </div>
+            <div class="district-grid">
+               <div class="header-box persistent label" id="container-district-label"><div id="district-label" class="label__header"></div></div>
+               <div class="district-box" id="container-district-info">
+                  <div class="district-table" id="district-info-table"></div>
                </div>
-               <div class="note-grid">
-                  <div class="note-container">
-                     <div class="note">Hover over bolded text for more information.</div>
-                  </div>
+            </div>
+            <div class="note-grid">
+               <div class="note-container">
+                  <div class="note">Hover over bolded text for more information.</div>
                </div>
-               <div class="download-grid">
-                  <div class="download-group">
-                     <div class="button-text">Download:</div>
-                     <button id="csvButton" class="button-tab">CSV</button>
-                     <button id="excelButton" class="button-tab">Excel</button>
-                  </div>
+            </div>
+            <div class="download-grid">
+               <div class="download-group">
+                  <div class="button-text">Download:</div>
+                  <button id="csvButton" class="button-tab">CSV</button>
+                  <button id="excelButton" class="button-tab">Excel</button>
                </div>
-               <div class="analysis-tab-grid nav" id="analysis-tabs-container">
-                  <div id ="analysistabnavigation">
-                     <div id="analysis-nav-tabs" class="nav">
-                        <button data-tab="tab-n-4" id="absenteeismAnalysisTab" class="tab main">Absenteeism</button>
-                        <button data-tab="tab-n-5" id="attendanceAnalysisTab" class="tab main">Attendance Rate</button>
-                     </div>
-                  </div>
+            </div>
+            <div class="analysis-tab-grid" id="analysis-tabs-container">
+               <div id ="analysistabnavigation">
+                  <!-- <div id="analysis-nav-tabs" class="nav" data-group="sub-tabs">
+                     <button type="button" data-tab="tab-s-1" id="absenteeismAnalysisTab" class="tab main active">Absenteeism</button>
+                     <button type="button" data-tab="tab-s-2" id="attendanceAnalysisTab" class="tab main">Attendance Rate</button>
+                  </div> -->
+                  <div id="sub-nav-tabs" class="nav">
+                     <button id="absenteeismAnalysisTab" class="tab sub active">Absenteeism</button>
+                     <button id="attendanceAnalysisTab" class="tab sub">Attendance Rate</button>
+                  </div>                     
                </div>
-               <div class="funding-grid">
-                  <div class="header-box label" id="container-funding-label"><div id="funding-label" class="label__header"></div></div>     
-                  <div class="table-box"  id="container-funding-table"><div id="fundingTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="funding-grid">
+               <div class="header-box label" id="container-funding-label"><div id="funding-label" class="label__header"></div></div>     
+               <div class="table-box"  id="container-funding-table"><div id="fundingTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="attendance-grid">
+               <div id="tst">
+                  <div class="header-box label" id="container-attendance-label"><div id="attendance-label" class="label__header"></div></div>
+                  <div id="attend-msg-container"><div id="attend-msg">This is an attendance message</div></div>
                </div>
-               <div class="attendance-grid">
-                  <div id="tst">
-                     <div class="header-box label" id="container-attendance-label"><div id="attendance-label" class="label__header"></div></div>
-                     <div id="attend-msg-container"><div id="attend-msg">This is an attendance message</div></div>
-                  </div>
-                  <div class="table-box"  id="container-attendance-table"><div id="attendanceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div> 
-               <div class="absenteeism-grid">
-                  <div class="header-box label" id="container-absenteeism-label"><div id="absenteeism-label" class="label__header"></div></div>
-                  <div id="absent-msg-container"><div id="absent-msg">This is an absenteeism message</div></div>
-                  <div class="table-box"  id="container-absenteeism-table"><div id="absenteeismTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>
-               <div class="absenteeism-diff-grid">
-                  <div class="header-box label" id="container-absenteeism-diff-label"><div id="absenteeism-diff-label" class="label__header"></div></div>
-                  <div class="table-box"  id="container-absenteeism-diff-table"><div id="absenteeismDiffTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>
-               <div class="absenteeism-slice-grid">
-                  <div class="header-box label" id="container-absenteeism-slice-label"><div id="absenteeism-slice-label" class="label__header"></div></div>
-                  <div class="table-box"  id="container-absenteeism-slice-table"><div id="absenteeismSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>
-               <div class="attendance-diff-grid">
-                  <div class="header-box label" id="container-attendance-diff-label"><div id="attendance-diff-label" class="label__header"></div></div>
-                  <div class="table-box"  id="container-attendance-diff-table"><div id="attendanceDiffTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>
-               <div class="attendance-slice-grid">
-                  <div class="header-box label" id="container-attendance-slice-label"><div id="attendance-slice-label" class="label__header"></div></div>
-                  <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
-               </div>
+               <div class="table-box"  id="container-attendance-table"><div id="attendanceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div> 
+            <div class="absenteeism-grid">
+               <div class="header-box label" id="container-absenteeism-label"><div id="absenteeism-label" class="label__header"></div></div>
+               <div id="absent-msg-container"><div id="absent-msg">This is an absenteeism message</div></div>
+               <div class="table-box"  id="container-absenteeism-table"><div id="absenteeismTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="attendance-diff-grid">
+               <div class="header-box label" id="container-attendance-diff-label"><div id="attendance-diff-label" class="label__header"></div></div>
+               <div class="table-box"  id="container-attendance-diff-table"><div id="attendanceDiffTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="attendance-slice-grid">
+               <div class="header-box label" id="container-attendance-slice-label"><div id="attendance-slice-label" class="label__header"></div></div>
+               <div class="table-box"  id="container-attendance-slice-table"><div id="attendanceSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="absenteeism-diff-grid">
+               <div class="header-box label" id="container-absenteeism-diff-label"><div id="absenteeism-diff-label" class="label__header"></div></div>
+               <div class="table-box"  id="container-absenteeism-diff-table"><div id="absenteeismDiffTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
+            <div class="absenteeism-slice-grid">
+               <div class="header-box label" id="container-absenteeism-slice-label"><div id="absenteeism-slice-label" class="label__header"></div></div>
+               <div class="table-box"  id="container-absenteeism-slice-table"><div id="absenteeismSliceTable" style="width: 100%; height: 100%" class="ag-theme-quartz"></div></div>
+            </div>
          </div>            
       </div>
    </div>
@@ -149,7 +158,7 @@ const attendanceMsgData = `${window.origin}/attend_msg`;
 const attendanceMsgDataResponse = await fetch(attendanceMsgData);
 var attendanceMsgDataObj = await attendanceMsgDataResponse.json();
 
-var titleGridApi,
+var fundingGridApi,
    attendanceGridApi,
    absenteeismGridApi,
    absenteeismDiffGridApi,
@@ -164,20 +173,20 @@ const attendanceContainer = document.getElementById("container-attendance-table"
 const absenteeismContainerLabel = document.getElementById("container-absenteeism-label");
 const absenteeismContainer = document.getElementById("container-absenteeism-table");
 
-const absenteeismDiffContainerLabel = document.getElementById("container-absenteeism-diff-label");
-const absenteeismDiffContainer = document.getElementById("container-absenteeism-diff-table");
-
-const absenteeismSliceContainerLabel = document.getElementById("container-absenteeism-slice-label");
-const absenteeismSliceContainer = document.getElementById("container-absenteeism-slice-table");
-
 const attendanceDiffContainerLabel = document.getElementById("container-attendance-diff-label");
 const attendanceDiffContainer = document.getElementById("container-attendance-diff-table");
 
 const attendanceSliceContainerLabel = document.getElementById("container-attendance-slice-label");
 const attendanceSliceContainer = document.getElementById("container-attendance-slice-table");
 
-const titleContainerLabel = document.getElementById("container-funding-label");
-const titleContainer = document.getElementById("container-funding-table");
+const absenteeismDiffContainerLabel = document.getElementById("container-absenteeism-diff-label");
+const absenteeismDiffContainer = document.getElementById("container-absenteeism-diff-table");
+
+const absenteeismSliceContainerLabel = document.getElementById("container-absenteeism-slice-label");
+const absenteeismSliceContainer = document.getElementById("container-absenteeism-slice-table");
+
+const fundingContainerLabel = document.getElementById("container-funding-label");
+const fundingContainer = document.getElementById("container-funding-table");
 
 const attendMsgContainer = document.getElementById("attend-msg-container");
 const attendMsg = document.getElementById("attend-msg");
@@ -230,7 +239,7 @@ async function getAllDistrictData(state, district) {
             alert("Network Error: Could not load data.")
          }
    });
-   displayDistrictTitleTable(data);
+   displayDistrictFundingTable(data);
 };
 
 
@@ -324,7 +333,7 @@ async function downloadData(select, id) {
    else {
       console.error("No tab selected.")
       return
-   }
+   };
 
    let downloadData;
 
@@ -631,12 +640,25 @@ async function setDistrictList() {
 };
 
 
-// This function must be located in in index.html so
-// getSingleDistrictData() is in scope
-// TODO: DOes it though? Move get_single_district_data to table helpers? or move
-// TODO: all of the getter functions to their own file?
+// TODO: Does this function need to be located in in index.html so
+// getSingleDistrictData() is in scope? or can we move get_single_district_data
+// to api.py or something?
 // TODO: REWORK THIS - it messy
 function createAgTable(tableData, tableID) {
+
+
+//////
+   var emptyTableOptions = {
+      columnDefs: [],
+      rowData: [],
+      enableBrowserTooltips: false,
+      noRowsOverlayComponent: CustomNoRowsOverlay,
+      noRowsOverlayComponentParams: {
+         noRowsMessageFunc: () =>
+            "No Data to Display.",
+      },
+   };
+//////
 
    // because we don't know what the fund titles will be, we
    // need to mark them with the Fnd_ prefix for later identification,
@@ -688,7 +710,7 @@ function createAgTable(tableData, tableID) {
       }
 
    } else if (tableID.includes('Diff') || tableID.includes('Slice')) {
-      
+
       if (tableID.includes('absenteeism')) {
          keys = [
             'District Name', 'Absenteeism', 'Absenteeism Change', totalCol[0]
@@ -702,7 +724,7 @@ function createAgTable(tableData, tableID) {
 
    let columns = keys.map(field => ({field}));
 
-   // this is messy, but covers all five types of tables
+   // this is messy, but covers all five types of table in one
    columns.forEach(function(e) {
       if (e.field == "District Name") {
          e.valueFormatter = "";
@@ -811,12 +833,16 @@ function createAgTable(tableData, tableID) {
    });
 
    let clickTimeout = null;
+
    // Resets district info table when the respective district
    // funding row table is clicked - do nothing if "State
    // Average" is clicked
    let options = {
       columnDefs: columns,
-      onRowClicked: (params) => {
+      onCellClicked: (params) => {
+      // onRowClicked: (params) => {
+         console.log("CLICK")
+         console.log(params)
          // If a user clicks a district twice in quick succession,
          // the table gets appended twice- clickTimeout waits 250ms
          // to see if there is a second click and if so, blocks it. Not the
@@ -869,6 +895,10 @@ function createAgTable(tableData, tableID) {
             "No Data to Display.",
       },
    };
+
+   
+   console.log(tableID)
+   console.log(options)
 
    return options
 };
@@ -976,37 +1006,49 @@ districtSelection.addEventListener("change", async () => {
 });
 
 
+document.querySelectorAll('.nav').forEach(group => {
+  group.addEventListener('click', (e) => {
+    const clickedBtn = e.target.closest('button');
+    if (!clickedBtn) return;
+
+    // Remove 'active' from all buttons in this specific set
+    group.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+
+    // Add 'active' to the clicked button
+    clickedBtn.classList.add('active');
+  });
+});
+
+/// NOTE: Old version - testing above ///
+
 // Switches active status for tabs
-const navTabs = document.querySelector("div#nav-tabs"),
-      nav_tab_elms = document.querySelectorAll("button[data-tab], div[data-tab]");
+// const navTabs = document.querySelector("div#nav-tabs"),
+//       nav_tab_elms = document.querySelectorAll("button[data-tab], div[data-tab]");
 
-navTabs.onclick = ({target}) => {
-   // ignore other clicks in this area (like spaces between buttons)
-   if (!target.matches("button[data-tab]")) return;
+// navTabs.onclick = ({target}) => {
 
-   // cycling through "dataset" and setting class to active
-   // where the target.dataset equals the class
-   nav_tab_elms.forEach(elTab => {
-      elTab.classList
-      .toggle("active", (elTab.dataset.tab===target.dataset.tab))
-   })
-};
+//    // ignore other clicks in this area (like spaces between buttons)
+//    if (!target.matches("button[data-tab]")) return;
 
-const analysisNavTabs = document.querySelector("div#analysis-nav-tabs"),
-      analysisNavTabElements = document.querySelectorAll("button[data-tab], div[data-tab]");
+//    // cycling through "dataset" and setting class to active
+//    // where the target.dataset equals the class
+//    nav_tab_elms.forEach(elTab => {
+//       elTab.classList
+//       .toggle("active", (elTab.dataset.tab===target.dataset.tab))
+//    })
+// };
 
-analysisNavTabs.onclick = ({target}) => {
-   // ignore other clicks in this area (like spaces between buttons)
-   if (!target.matches("button[data-tab]")) return;
+// const analysisNavTabs = document.querySelector("div#analysis-nav-tabs"),
+//       an_nav_tab_elms = document.querySelectorAll("button[data-tab], div[analysis-nav-tabs]");
 
-   // cycling through "dataset" and setting class to active
-   // where the target.dataset equals the class
-   analysisNavTabElements.forEach(elTab => {
-      elTab.classList
-      .toggle("active", (elTab.dataset.tab===target.dataset.tab))
-   })
-};
+// analysisNavTabs.onclick = ({target}) => {
 
+//    if (!target.matches("button[data-tab]")) return;
+//    an_nav_tab_elms.forEach(elTab => {
+//       elTab.classList
+//       .toggle("active", (elTab.dataset.tab===target.dataset.tab))
+//    })
+// };
 
 if (tabnavigation.addEventListener) {
    tabnavigation.addEventListener('click',navigateHandler,false);
@@ -1030,8 +1072,8 @@ async function navigateHandler(e) {
    // district resets on state change, but not nav tab change
    if (target.id == "attendanceTab") {
 
-      titleContainer.style.display = "none";
-      titleContainerLabel.style.display = "none";
+      fundingContainer.style.display = "none";
+      fundingContainerLabel.style.display = "none";
       analysisTabsContainer.style.display = "none";
       absenteeismDiffContainer.style.display = "none";
       absenteeismDiffContainerLabel.style.display = "none";
@@ -1078,12 +1120,16 @@ async function navigateHandler(e) {
       attendanceDiffContainerLabel.style.display = "none";
       attendanceSliceContainer.style.display = "none";
       attendanceSliceContainerLabel.style.display = "none";  
-      titleContainer.style.display = "flex";
-      titleContainerLabel.style.display = "flex";
+      fundingContainer.style.display = "flex";
+      fundingContainerLabel.style.display = "flex";
 
       getAllDistrictData(stateSelection.value, districtSelection.value);
 
    } else {
+      let districtInfoTableDiv = document.getElementById('district-info-table');
+      fadeDiv(districtInfoTableDiv, 250);
+      districtInfoTableDiv.innerHTML = '';
+
       attendanceContainer.style.display = "none";
       attendanceContainerLabel.style.display = "none";
       absenteeismContainer.style.display = "none";
@@ -1092,8 +1138,8 @@ async function navigateHandler(e) {
       attendMsg.style.display = "none";
       absentMsgContainer.style.display = "none";
       absentMsg.style.display = "none";
-      titleContainer.style.display = "none";
-      titleContainerLabel.style.display = "none";
+      fundingContainer.style.display = "none";
+      fundingContainerLabel.style.display = "none";
       analysisTabsContainer.style.display = "flex";
 
       if (target.id == "attendanceAnalysisTab") {
@@ -1190,7 +1236,7 @@ async function displayDistrictInfoTable(data) {
 };
 
 
-async function displayDistrictTitleTable(data) {
+async function displayDistrictFundingTable(data) {
    
    let tableLabel = document.getElementById("container-funding-label");
    tableLabel.firstChild.textContent = "School District List";
@@ -1206,7 +1252,7 @@ async function displayDistrictTitleTable(data) {
 
    let tableOptions = createAgTable(tableData,"fundingTable");
 
-   if (!displayDistrictTitleTable.initialize) {
+   if (!displayDistrictFundingTable.initialize) {
 
       // set default visibility of the three tables
       attendanceContainer.style.display = "none";
@@ -1226,44 +1272,302 @@ async function displayDistrictTitleTable(data) {
       attendanceDiffContainerLabel.style.display = "none";
       attendanceSliceContainer.style.display = "none";
       attendanceSliceContainerLabel.style.display = "none"; 
-      titleContainer.style.display = "flex";
-      titleContainerLabel.style.display = "flex";
+      fundingContainer.style.display = "flex";
+      fundingContainerLabel.style.display = "flex";
 
-      const titleGridDiv = document.querySelector("#fundingTable");
+      const fundingGridDiv = document.querySelector("#fundingTable");
 
-      titleGridApi = agGrid.createGrid(
-            titleGridDiv, tableOptions
+      fundingGridApi = agGrid.createGrid(
+            fundingGridDiv, tableOptions
          );
-         displayDistrictTitleTable.initialize = true;
+         displayDistrictFundingTable.initialize = true;
    }
    else {
-      titleGridApi.setGridOption(
+      fundingGridApi.setGridOption(
             "columnDefs", tableOptions.columnDefs
          );
-      titleGridApi.setGridOption("rowData", tableData);
+      fundingGridApi.setGridOption("rowData", tableData);
    }
 };
+
+// async function displayAnalysisTables(data) {
+
+//    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
+
+//    const pageTab = document.querySelector(".tab.main.active").id;
+//    let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
+//    absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
+
+//    let absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
+//    absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
+   
+//    let attendanceDiffLabel = document.getElementById("container-attendance-diff-label");
+//    attendanceDiffLabel.firstChild.textContent = "Largest Attendance Decrease";
+
+//    let attendanceSliceLabel = document.getElementById("container-attendance-slice-label");
+//    attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
+
+//    let absenteeismDiff = {},
+//        absenteeismSlice = {},
+//        attendanceDiff = {},
+//        attendanceSlice = {};
+
+//    const keyMap = {
+//       'Absenteeism Difference': 'Absenteeism Change',
+//       'Attendance Difference': 'Attendance Change',
+//       'Chronic Absenteeism': 'Absenteeism',
+//       'Attendance Rate': 'Attendance',
+//    };
+
+//    // If all CA data is empty, there will be neither a Slice nor a Diff, if there
+//    // is CA data AND there is a "Difference" key, we will have a Diff and a
+//    // Slice. If there is no "Difference" key, but CA has data, we will only have
+//    // a Slice.
+//    if(!data.every(obj => isEmpty(obj["Chronic Absenteeism"]))) {
+
+//       if (data.some(obj => 'Absenteeism Difference' in obj)) {
+//          let rawAbsenteeismDiff = structuredClone(data);
+//          rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+//             obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075 &&
+//             obj['Chronic Absenteeism'] < .85
+//          )
+//          rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
+//          absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
+//       }
+
+//       let rawAbsenteeismSlice = structuredClone(data);
+
+//       // drop districts with absenteeism of 85% or higher - districts with absenteeism
+//       // this high are almost always specialty schools (e.g., adult)
+//       rawAbsenteeismSlice = rawAbsenteeismSlice.filter(
+//          obj => obj['Chronic Absenteeism'] !="" && obj['Chronic Absenteeism'] < .85
+//       )
+//       rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
+//       rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
+//       absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
+//    }
+
+//    if(!data.every(obj => isEmpty(obj["Attendance Rate"]))) {
+
+//       if (data.some(obj => 'Attendance Difference' in obj)) {
+//          let rawAttendanceDiff = structuredClone(data);
+//          rawAttendanceDiff = data.filter(obj => obj['Attendance Rate'] !="" &&
+//             obj['Attendance Difference'] !="" && obj['Attendance Difference'] < -0.075
+//          )
+//          rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
+//          attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
+//       }
+
+//       let rawAttendanceSlice = structuredClone(data);
+//       rawAttendanceSlice.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
+//       rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
+//       attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
+//    }
+
+//    var emptyTableOptions = {
+//       columnDefs: [
+//          {
+//             headerName: "District Name",
+//             field: "District Name",
+//             resizable: false,
+//             autoHeight: true,
+//             minWidth: 150,
+//             maxWidth: 150
+//          },
+//          {
+//             headerName: "Entity ID",
+//             field: "Entity ID",
+//             flex: 1,
+//             resizable: false,
+//             headerClass: "text-center"
+//          },
+//       ],
+//       rowData: [],
+//       enableBrowserTooltips: false,
+//       noRowsOverlayComponent: CustomNoRowsOverlay,
+//       noRowsOverlayComponentParams: {
+//          noRowsMessageFunc: () =>
+//             "No Data to Display.",
+//       },
+//    };
+
+
+//    /* Absenteeism Diff */
+
+//    // if there is no absenteeismDiff data
+//    if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
+
+//       // create an empty grid if it does not exist
+//       if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
+//          console.log("no absenteeismDiff data and no grid exists")
+//          const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
+//          emptyTableOptions.gridId = 'absenteeismDiffTable';
+//          absenteeismDiffGridApi = agGrid.createGrid(
+//             absenteeismDiffTableGridDiv, emptyTableOptions
+//          );
+
+//       } else { // if there is no data and grid already exists, show empty table
+//          console.log("no absenteeismDiff data but grid already exists")
+//          absenteeismDiffGridApi.setGridOption('columnDefs', []);
+//          absenteeismDiffGridApi.setGridOption("rowData", []);
+//          absenteeismDiffGridApi.showNoRowsOverlay();
+//       }
+
+//    } else { // if absenteeismDiff data exists, create table options
+
+//       let absenteeismDiffTableOptions = createAgTable(
+//          absenteeismDiff, "absenteeismDiffTable"
+//       );
+
+//       // create a grid if it does not exist and populate with table options
+//       if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
+//          console.log("YES absenteeismDiff data but no grid exists")
+//          const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
+
+//          absenteeismDiffGridApi = agGrid.createGrid(
+//             absenteeismDiffTableGridDiv, absenteeismDiffTableOptions
+//             );
+//       }
+//       else { // if grid already exists, just change table.
+//          console.log("YES absenteeismDiff data AND grid already exists")
+//          absenteeismDiffGridApi.setGridOption(
+//             "columnDefs", absenteeismDiffTableOptions.columnDefs
+//          );
+//          absenteeismDiffGridApi.setGridOption("rowData", absenteeismDiff);
+//       }      
+//    };
+
+//    /* Absenteeism Slice */
+//    if (!Array.isArray(absenteeismSlice) || !absenteeismSlice.length) {
+
+//       if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
+
+//          const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
+         
+//          emptyTableOptions.gridId = 'absenteeismSliceTable';
+         
+//          absenteeismSliceGridApi = agGrid.createGrid(
+//             absenteeismSliceTableGridDiv, emptyTableOptions
+//             );
+
+//       } else {
+//          absenteeismSliceGridApi.setGridOption('columnDefs', []);
+//          absenteeismSliceGridApi.setGridOption("rowData", []);
+//          absenteeismSliceGridApi.showNoRowsOverlay();
+//       }
+//       } else {
+
+//       let absenteeismSliceTableOptions = createAgTable(
+//          absenteeismSlice, "absenteeismSliceTable"
+//       );
+
+//       if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
+
+//          const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
+
+//          absenteeismSliceGridApi = agGrid.createGrid(
+//             absenteeismSliceTableGridDiv, absenteeismSliceTableOptions
+//             );
+//       }
+//       else {
+//          absenteeismSliceGridApi.setGridOption(
+//             "columnDefs", absenteeismSliceTableOptions.columnDefs
+//          );
+//          absenteeismSliceGridApi.setGridOption("rowData", absenteeismSlice);
+//       }      
+//    };
+
+//    /* Attendance Diff */
+//    if (!Array.isArray(attendanceDiff) || !attendanceDiff.length) {
+
+//       // create table if it does not exist
+//       if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+//          const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+         
+//          emptyTableOptions.gridId = 'attendanceDiffTable';
+         
+//          attendanceDiffGridApi = agGrid.createGrid(
+//             attendanceDiffTableGridDiv, emptyTableOptions
+//             );
+
+//       } else {
+//          // if exists, but no data, show empty table
+//          attendanceDiffGridApi.setGridOption('columnDefs', []);
+//          attendanceDiffGridApi.setGridOption("rowData", []);
+//          attendanceDiffGridApi.showNoRowsOverlay();
+//       }
+//    } else {
+
+//       let attendanceDiffTableOptions = createAgTable(
+//          attendanceDiff, "attendanceDiffTable"
+//       );
+
+//       // create table if it does not exist
+
+//       if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+//          const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+
+//          attendanceDiffGridApi = agGrid.createGrid(
+//             attendanceDiffTableGridDiv, attendanceDiffTableOptions
+//             );
+//       }
+//       else {
+//          attendanceDiffGridApi.setGridOption(
+//             "columnDefs", attendanceDiffTableOptions.columnDefs
+//          );
+//          attendanceDiffGridApi.setGridOption("rowData", attendanceDiff);
+//       }      
+//    };
+
+//    /* Attendance Slice */
+//    if (!Array.isArray(attendanceSlice) || !attendanceSlice.length) {
+
+//       if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+
+//          const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
+         
+//          emptyTableOptions.gridId = 'attendanceSliceTable';
+         
+//          attendanceSliceGridApi = agGrid.createGrid(
+//             attendanceSliceTableGridDiv, emptyTableOptions
+//             );
+
+//       } else {
+//          attendanceSliceGridApi.setGridOption('columnDefs', []);
+//          attendanceSliceGridApi.setGridOption("rowData", []);
+//          attendanceSliceGridApi.showNoRowsOverlay();
+//       }
+//       } else {
+
+//       let attendanceSliceTableOptions = createAgTable(
+//          attendanceSlice, "attendanceSliceTable"
+//       );
+
+//       if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+
+//          const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
+
+//          attendanceSliceGridApi = agGrid.createGrid(
+//             attendanceSliceTableGridDiv, attendanceSliceTableOptions
+//             );
+//       }
+//       else {
+//          attendanceSliceGridApi.setGridOption(
+//             "columnDefs", attendanceSliceTableOptions.columnDefs
+//          );
+//          attendanceSliceGridApi.setGridOption("rowData", attendanceSlice);
+//       }      
+//    };
+
+// }
 
 async function displayAnalysisTables(data) {
 
    const stateName = stateSelection.options[stateSelection.selectedIndex].text;
 
-   let absenteeismDiffLabel = document.getElementById("container-absenteeism-diff-label");
-   absenteeismDiffLabel.firstChild.textContent = "Largest Absenteeism Increase";
-
-   let absenteeismSliceLabel = document.getElementById("container-absenteeism-slice-label");
-   absenteeismSliceLabel.firstChild.textContent = "Highest Absenteeism";
-   
-   let attendanceDiffLabel = document.getElementById("container-attendance-diff-label");
-   attendanceDiffLabel.firstChild.textContent = "Largest Attendance Decrease";
-
-   let attendanceSliceLabel = document.getElementById("container-attendance-slice-label");
-   attendanceSliceLabel.firstChild.textContent = "Lowest Attendance";
-
-   let absenteeismDiff = {},
-       absenteeismSlice = {},
-       attendanceDiff = {},
-       attendanceSlice = {};
+   const subTab = document.querySelector(".tab.sub.active").id;
 
    const keyMap = {
       'Absenteeism Difference': 'Absenteeism Change',
@@ -1271,51 +1575,6 @@ async function displayAnalysisTables(data) {
       'Chronic Absenteeism': 'Absenteeism',
       'Attendance Rate': 'Attendance',
    };
-
-   // If all CA data is empty, there will be neither a Slice nor a Diff, if there
-   // is CA data AND there is a "Difference" key, we will have a Diff and a
-   // Slice. If there is no "Difference" key, but CA has data, we will only have
-   // a Slice.
-   if(!data.every(obj => isEmpty(obj["Chronic Absenteeism"]))) {
-
-      if (data.some(obj => 'Absenteeism Difference' in obj)) {
-         let rawAbsenteeismDiff = structuredClone(data);
-         rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
-            obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075 &&
-            obj['Chronic Absenteeism'] < .85
-         )
-         rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
-         absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
-      }
-
-      let rawAbsenteeismSlice = structuredClone(data);
-
-      // drop districts with absenteeism of 85% or higher - districts with absenteeism
-      // this high are almost always specialty schools (e.g., adult)
-      rawAbsenteeismSlice = rawAbsenteeismSlice.filter(
-         obj => obj['Chronic Absenteeism'] !="" && obj['Chronic Absenteeism'] < .85
-      )
-      rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
-      rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
-      absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
-   }
-
-   if(!data.every(obj => isEmpty(obj["Attendance Rate"]))) {
-
-      if (data.some(obj => 'Attendance Difference' in obj)) {
-         let rawAttendanceDiff = structuredClone(data);
-         rawAttendanceDiff = data.filter(obj => obj['Attendance Rate'] !="" &&
-            obj['Attendance Difference'] !="" && obj['Attendance Difference'] < -0.075
-         )
-         rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
-         attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
-      }
-
-      let rawAttendanceSlice = structuredClone(data);
-      rawAttendanceSlice.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
-      rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
-      attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
-   }
 
    var emptyTableOptions = {
       columnDefs: [
@@ -1344,176 +1603,235 @@ async function displayAnalysisTables(data) {
       },
    };
 
+   if (subTab === "absenteeismAnalysisTab") {
+      absenteeismDiffContainerLabel.firstChild.textContent = "Largest Absenteeism Increase";
+      absenteeismSliceContainerLabel.firstChild.textContent = "Highest Absenteeism";
 
-   /* Absenteeism Diff */
-   if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
+      let absenteeismDiff = {},
+         absenteeismSlice = {};
 
-      // create table if it does not exist
-      if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
+      // If all CA data is empty, there will be neither a Slice nor a Diff, if there
+      // is CA data AND there is a "Difference" key, we will have a Diff and a
+      // Slice. If there is no "Difference" key, but CA has data, we will only have
+      // a Slice.
+      if(!data.every(obj => isEmpty(obj["Chronic Absenteeism"]))) {
 
-         const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
-         
-         emptyTableOptions.gridId = 'absenteeismDiffTable';
-         
-         absenteeismDiffGridApi = agGrid.createGrid(
-            absenteeismDiffTableGridDiv, emptyTableOptions
+         if (data.some(obj => 'Absenteeism Difference' in obj)) {
+            let rawAbsenteeismDiff = structuredClone(data);
+            rawAbsenteeismDiff = data.filter(obj => obj['Chronic Absenteeism'] !="" &&
+               obj['Absenteeism Difference'] !="" && obj['Absenteeism Difference'] > -0.075 &&
+               obj['Chronic Absenteeism'] < .85
+            )
+            rawAbsenteeismDiff.sort((a, b) => b['Absenteeism Difference'] - a['Absenteeism Difference']);
+            absenteeismDiff = replaceKeys(rawAbsenteeismDiff, keyMap);
+         }
+
+         let rawAbsenteeismSlice = structuredClone(data);
+
+         // drop districts with absenteeism of 85% or higher - districts with absenteeism
+         // this high are almost always specialty schools (e.g., adult)
+         rawAbsenteeismSlice = rawAbsenteeismSlice.filter(
+            obj => obj['Chronic Absenteeism'] !="" && obj['Chronic Absenteeism'] < .85
+         )
+         rawAbsenteeismSlice.sort((a, b) => b['Chronic Absenteeism'] - a['Chronic Absenteeism']);
+         rawAbsenteeismSlice = rawAbsenteeismSlice.slice(0, 20);
+         absenteeismSlice = replaceKeys(rawAbsenteeismSlice, keyMap);
+      }
+
+      /* Absenteeism Diff */
+
+      // if there is no absenteeismDiff data
+      if (!Array.isArray(absenteeismDiff) || !absenteeismDiff.length) {
+
+         // create an empty grid if it does not exist
+         if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
+            const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
+            emptyTableOptions.gridId = 'absenteeismDiffTable';
+            absenteeismDiffGridApi = agGrid.createGrid(
+               absenteeismDiffTableGridDiv, emptyTableOptions
             );
 
-      } else {
-         // if exists, but no data, show empty table
-         absenteeismDiffGridApi.setGridOption('columnDefs', []);
-         absenteeismDiffGridApi.setGridOption("rowData", []);
-         absenteeismDiffGridApi.showNoRowsOverlay();
-      }
-   } else {
+         } else { // if there is no data and grid already exists, show empty table
+            absenteeismDiffGridApi.setGridOption('columnDefs', []);
+            absenteeismDiffGridApi.setGridOption("rowData", []);
+            absenteeismDiffGridApi.showNoRowsOverlay();
+         }
 
-      let absenteeismDiffTableOptions = createAgTable(
-         absenteeismDiff, "absenteeismDiffTable"
-      );
+      } else { // if absenteeismDiff data exists, create table options
 
-      // create table if it does not exist
-
-      if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
-
-         const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
-
-         absenteeismDiffGridApi = agGrid.createGrid(
-            absenteeismDiffTableGridDiv, absenteeismDiffTableOptions
-            );
-      }
-      else {
-         absenteeismDiffGridApi.setGridOption(
-            "columnDefs", absenteeismDiffTableOptions.columnDefs
+         let absenteeismDiffTableOptions = createAgTable(
+            absenteeismDiff, "absenteeismDiffTable"
          );
-         absenteeismDiffGridApi.setGridOption("rowData", absenteeismDiff);
-      }      
-   };
 
-   /* Absenteeism Slice */
-   if (!Array.isArray(absenteeismSlice) || !absenteeismSlice.length) {
+         // create a grid if it does not exist and populate with table options
+         if (!absenteeismDiffGridApi || Object.keys(absenteeismDiffGridApi).length === 0) {
+            const absenteeismDiffTableGridDiv = document.querySelector("#absenteeismDiffTable");
 
-      if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
-
-         const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
-         
-         emptyTableOptions.gridId = 'absenteeismSliceTable';
-         
-         absenteeismSliceGridApi = agGrid.createGrid(
-            absenteeismSliceTableGridDiv, emptyTableOptions
+            absenteeismDiffGridApi = agGrid.createGrid(
+               absenteeismDiffTableGridDiv, absenteeismDiffTableOptions
+               );
+         }
+         else { // if grid already exists, just change table.
+            absenteeismDiffGridApi.setGridOption(
+               "columnDefs", absenteeismDiffTableOptions.columnDefs
             );
+            absenteeismDiffGridApi.setGridOption("rowData", absenteeismDiff);
+         }      
+      };
+
+      /* Absenteeism Slice */
+      if (!Array.isArray(absenteeismSlice) || !absenteeismSlice.length) {
+
+         if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
+
+            const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
+            
+            emptyTableOptions.gridId = 'absenteeismSliceTable';
+            
+            absenteeismSliceGridApi = agGrid.createGrid(
+               absenteeismSliceTableGridDiv, emptyTableOptions
+               );
+
+         } else {
+            absenteeismSliceGridApi.setGridOption('columnDefs', []);
+            absenteeismSliceGridApi.setGridOption("rowData", []);
+            absenteeismSliceGridApi.showNoRowsOverlay();
+         };
 
       } else {
-         absenteeismSliceGridApi.setGridOption('columnDefs', []);
-         absenteeismSliceGridApi.setGridOption("rowData", []);
-         absenteeismSliceGridApi.showNoRowsOverlay();
-      }
-      } else {
 
-      let absenteeismSliceTableOptions = createAgTable(
-         absenteeismSlice, "absenteeismSliceTable"
-      );
-
-      if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
-
-         const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
-
-         absenteeismSliceGridApi = agGrid.createGrid(
-            absenteeismSliceTableGridDiv, absenteeismSliceTableOptions
-            );
-      }
-      else {
-         absenteeismSliceGridApi.setGridOption(
-            "columnDefs", absenteeismSliceTableOptions.columnDefs
+         let absenteeismSliceTableOptions = createAgTable(
+            absenteeismSlice, "absenteeismSliceTable"
          );
-         absenteeismSliceGridApi.setGridOption("rowData", absenteeismSlice);
-      }      
-   };
 
-   /* Attendance Diff */
-   if (!Array.isArray(attendanceDiff) || !attendanceDiff.length) {
+         if (!absenteeismSliceGridApi || Object.keys(absenteeismSliceGridApi).length === 0) {
 
-      // create table if it does not exist
-      if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+            const absenteeismSliceTableGridDiv = document.querySelector("#absenteeismSliceTable");
 
-         const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
-         
-         emptyTableOptions.gridId = 'attendanceDiffTable';
-         
-         attendanceDiffGridApi = agGrid.createGrid(
-            attendanceDiffTableGridDiv, emptyTableOptions
+            absenteeismSliceGridApi = agGrid.createGrid(
+               absenteeismSliceTableGridDiv, absenteeismSliceTableOptions
             );
 
+         } else {
+            absenteeismSliceGridApi.setGridOption(
+               "columnDefs", absenteeismSliceTableOptions.columnDefs
+            );
+            absenteeismSliceGridApi.setGridOption("rowData", absenteeismSlice);
+         }      
+      };
+
+   } else { // attendance tables
+
+      attendanceDiffContainerLabel.firstChild.textContent = "Largest Attendance Decrease";
+      attendanceSliceContainerLabel.firstChild.textContent = "Lowest Attendance";
+
+      let attendanceDiff = {},
+         attendanceSlice = {};
+
+      if(!data.every(obj => isEmpty(obj["Attendance Rate"]))) {
+
+         if (data.some(obj => 'Attendance Difference' in obj)) {
+            let rawAttendanceDiff = structuredClone(data);
+            rawAttendanceDiff = data.filter(obj => obj['Attendance Rate'] !="" &&
+               obj['Attendance Difference'] !="" && obj['Attendance Difference'] < -0.075
+            )
+            rawAttendanceDiff.sort((a, b) => a['Attendance Difference'] - b['Attendance Difference']);
+            attendanceDiff = replaceKeys(rawAttendanceDiff, keyMap);
+         }
+
+         let rawAttendanceSlice = structuredClone(data);
+         rawAttendanceSlice.sort((a, b) => a['Attendance Rate'] - b['Attendance Rate']);
+         rawAttendanceSlice = rawAttendanceSlice.slice(0, 20);
+         attendanceSlice = replaceKeys(rawAttendanceSlice, keyMap);
+      }
+
+      /* Attendance Diff */
+      if (!Array.isArray(attendanceDiff) || !attendanceDiff.length) {
+
+         // create table if it does not exist
+         if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+            const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+            
+            emptyTableOptions.gridId = 'attendanceDiffTable';
+            
+            attendanceDiffGridApi = agGrid.createGrid(
+               attendanceDiffTableGridDiv, emptyTableOptions
+            );
+
+         } else {
+            // if exists, but no data, show empty table
+            attendanceDiffGridApi.setGridOption('columnDefs', []);
+            attendanceDiffGridApi.setGridOption("rowData", []);
+            attendanceDiffGridApi.showNoRowsOverlay();
+         }
+      
       } else {
-         // if exists, but no data, show empty table
-         attendanceDiffGridApi.setGridOption('columnDefs', []);
-         attendanceDiffGridApi.setGridOption("rowData", []);
-         attendanceDiffGridApi.showNoRowsOverlay();
-      }
-   } else {
 
-      let attendanceDiffTableOptions = createAgTable(
-         attendanceDiff, "attendanceDiffTable"
-      );
-
-      // create table if it does not exist
-
-      if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
-
-         const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
-
-         attendanceDiffGridApi = agGrid.createGrid(
-            attendanceDiffTableGridDiv, attendanceDiffTableOptions
+            let attendanceDiffTableOptions = createAgTable(
+               attendanceDiff, "attendanceDiffTable"
             );
-      }
-      else {
-         attendanceDiffGridApi.setGridOption(
-            "columnDefs", attendanceDiffTableOptions.columnDefs
+
+         // create table if it does not exist
+
+         if (!attendanceDiffGridApi || Object.keys(attendanceDiffGridApi).length === 0) {
+
+            const attendanceDiffTableGridDiv = document.querySelector("#attendanceDiffTable");
+
+            attendanceDiffGridApi = agGrid.createGrid(
+               attendanceDiffTableGridDiv, attendanceDiffTableOptions
+               );
+
+         } else {
+            attendanceDiffGridApi.setGridOption(
+               "columnDefs", attendanceDiffTableOptions.columnDefs
+            );
+            attendanceDiffGridApi.setGridOption("rowData", attendanceDiff);
+         }      
+      };
+
+      /* Attendance Slice */
+      if (!Array.isArray(attendanceSlice) || !attendanceSlice.length) {
+
+         if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+
+            const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
+            
+            emptyTableOptions.gridId = 'attendanceSliceTable';
+            
+            attendanceSliceGridApi = agGrid.createGrid(
+               attendanceSliceTableGridDiv, emptyTableOptions
+               );
+
+         } else {
+            attendanceSliceGridApi.setGridOption('columnDefs', []);
+            attendanceSliceGridApi.setGridOption("rowData", []);
+            attendanceSliceGridApi.showNoRowsOverlay();
+         };
+
+         } else {
+
+         let attendanceSliceTableOptions = createAgTable(
+            attendanceSlice, "attendanceSliceTable"
          );
-         attendanceDiffGridApi.setGridOption("rowData", attendanceDiff);
-      }      
-   };
 
-   /* Attendance Slice */
-   if (!Array.isArray(attendanceSlice) || !attendanceSlice.length) {
+         if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
 
-      if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
+            const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
 
-         const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
-         
-         emptyTableOptions.gridId = 'attendanceSliceTable';
-         
-         attendanceSliceGridApi = agGrid.createGrid(
-            attendanceSliceTableGridDiv, emptyTableOptions
+            attendanceSliceGridApi = agGrid.createGrid(
+               attendanceSliceTableGridDiv, attendanceSliceTableOptions
             );
 
-      } else {
-         attendanceSliceGridApi.setGridOption('columnDefs', []);
-         attendanceSliceGridApi.setGridOption("rowData", []);
-         attendanceSliceGridApi.showNoRowsOverlay();
-      }
-      } else {
-
-      let attendanceSliceTableOptions = createAgTable(
-         attendanceSlice, "attendanceSliceTable"
-      );
-
-      if (!attendanceSliceGridApi || Object.keys(attendanceSliceGridApi).length === 0) {
-
-         const attendanceSliceTableGridDiv = document.querySelector("#attendanceSliceTable");
-
-         attendanceSliceGridApi = agGrid.createGrid(
-            attendanceSliceTableGridDiv, attendanceSliceTableOptions
+         } else {
+            attendanceSliceGridApi.setGridOption(
+               "columnDefs", attendanceSliceTableOptions.columnDefs
             );
-      }
-      else {
-         attendanceSliceGridApi.setGridOption(
-            "columnDefs", attendanceSliceTableOptions.columnDefs
-         );
-         attendanceSliceGridApi.setGridOption("rowData", attendanceSlice);
-      }      
-   };
-}
-
+            attendanceSliceGridApi.setGridOption("rowData", attendanceSlice);
+         }      
+      };
+   }
+};
 
 async function displayAttendanceTables(data) {
 
