@@ -629,7 +629,7 @@ async function setDistrictList() {
    // clear existing options
    removeOptions(districtSelection);
 
-   const allDistricts = { name: '-- All Schools --', id: '0' };
+   const allDistricts = { name: '-- All Districts --', id: '0' };
 
    districtDropdown.unshift(allDistricts);
 
@@ -719,6 +719,7 @@ function createAgTable(tableData, tableID) {
          e.wrapText = true;
          e.minWidth = 125;
          e.maxWidth = 125;
+         e.wrapHeaderText = true;
          e.cellClass = "ag-left-aligned-cell";
          e.headerClass = "text-center";
 
@@ -775,6 +776,7 @@ function createAgTable(tableData, tableID) {
 
          e.flex = 1;
          e.resizable = false;
+         e.wrapHeaderText = true;
          e.cellClass = "ag-center-aligned-cell";
          e.headerClass = "text-center";
          e.headerName = header;
@@ -1146,22 +1148,29 @@ async function displayStateInfoTables(data) {
 
 async function displayDistrictInfoTable(data) {
 
-   const districtName = districtSelection.options[districtSelection.selectedIndex].text;
+   const districtNameIdx = districtSelection.options[districtSelection.selectedIndex];
 
-   let districtLabel = document.getElementById("container-district-label");
-   districtLabel.firstChild.textContent = districtName + " Overview";
+   // let tableData;
 
-   // ensure selected table row and selected dropdown item are the same
-   districtSelection.value = selectedRow;
+   if (districtNameIdx != undefined) {
 
-   let tableData;
+      const districtName = districtNameIdx.text;
 
-   if (districtSelection.value == '0') {  // -- All Schools --
-      tableData = {} 
-   } else {
-      tableData = data[0];
+      let districtLabel = document.getElementById("container-district-label");
+      districtLabel.firstChild.textContent = districtName + " Overview";
+
+      // ensure selected table row and selected dropdown item are the same
+      districtSelection.value = selectedRow;
+
+      // if (districtSelection.value == '0') {  // -- All Schools --
+      //    tableData = {} 
+      // } else {
+      //    tableData = data[0];
+      // }
    }
-
+   // data[0] will be 'undefined' if selection is 'All Schools' or any district
+   // that isn't in district_info
+   console.log(data[0])
    districtInfoTable(data[0], "district-info-table");
 };
 
@@ -1537,6 +1546,8 @@ async function displayAttendanceTables(data) {
 
    let absenteeismLabel = document.getElementById("container-absenteeism-label");
    absenteeismLabel.firstChild.textContent = stateName + " Chronic Absenteeism";
+
+   let clickTimeout = null;
 
    var emptyTableOptions = {
       columnDefs: [
